@@ -10,7 +10,7 @@
                 </div>
             </div>
             <div class="col-md-12">
-                {!! Form::open(['route' => 'signatures.analyze', 'method' => 'put']) !!}
+                {!! Form::open(['route' => 'signatures.analyze', 'method' => 'post']) !!}
                     {{ csrf_field() }}
                     {{ Form::label('rawdata', 'Copy & paste scan data here') }}
                     {!! Form::textarea('rawdata', null, ['class'=>'form-control']) !!}
