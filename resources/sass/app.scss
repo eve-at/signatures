@@ -1,0 +1,223 @@
+@import "bootstrap.min.css";
+
+*, html {
+  /*font-family: "Miriam Libre", "Source Sans Pro", sans-serif;*/
+  font-family:Roboto, sans-serif;
+  color:#000;
+  margin:0;
+  padding:0;
+}
+
+#app {
+  padding-bottom:50px;
+}
+
+.row div.panel-heading {
+  padding:50px 0;
+}
+
+.row div.panel-body {
+  text-align:center;
+  padding:50px 0 100px;
+}
+
+.row div.panel-body a {
+  display:block;
+  margin:20px auto 60px;
+  padding:0;
+  width:270px;
+  height:45px;
+}
+
+h1 {
+  padding-top:50px;
+}
+
+h2 {
+  padding-top:30px;
+}
+
+.row div {
+  padding:0;
+}
+
+div.dropdown {
+  display: inline-block;
+  margin-right:20px;
+}
+.center {
+  text-align: center;
+}
+
+.right {
+  text-align: right;
+}
+.float-right {
+  float: right;
+}
+
+.zoom {
+  cursor:zoom-in;
+}
+
+.container {
+  max-width:900px;
+  display:block;
+  margin:0 auto;
+}
+
+form {
+  width:100%;
+}
+
+table {
+  border:none !important;
+  /*margin-top:30px;*/
+}
+
+table tr.station {
+  background: #dee2e6;
+  border:#dee2e6 1px solid !important;
+}
+
+h2 {
+  font-size: 1.5rem;
+}
+.character-image {
+  margin: -5px 5px 0 0;
+}
+
+
+table th {
+  border:none !important;
+  vertical-align: bottom !important;
+  padding: .25rem !important;
+}
+
+table td {
+  vertical-align: center !important;
+  padding: .25rem !important;
+}
+
+table tr.empty {
+  background:none !important;
+}
+table tr.empty td {
+  padding: 1rem 0 !important;
+  border:none !important;
+}
+
+.control,
+table tr.asset {
+  cursor:pointer;
+}
+
+table tr.asset.active {
+  background-color:rgb(195, 230, 203) !important;
+}
+
+
+table.dataTable {
+  margin-bottom:100px;
+}
+
+table.dataTable tfoot td {
+  border-top:2px solid #ddd;
+  font-weight:bold;
+}
+.dataTables_wrapper .dataTables_info {
+  display:none;
+}
+
+.updateLoader {
+  display:none;
+  z-index:1001;
+  background:#000;
+  opacity:0.7;
+  position:fixed;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+}
+
+.updateLoader img {
+  width:100px;
+  height:100px;
+  display:block;
+  margin: 200px auto 0;
+}
+
+h1 {
+  text-align:center;
+}
+
+ul.filter {
+  text-align:center;
+  padding: 0;
+}
+ul.filter li {
+  display:inline-block;
+  margin:10px;
+}
+ul.filter li.active {
+  text-decoration: underline;
+}
+
+.btnScrollToTop {
+  display: none; /* Hidden by default */
+  position: fixed; /* Fixed/sticky position */
+  bottom: 20px; /* Place the button at the bottom of the page */
+  right: 30px; /* Place the button 30px from the right */
+  z-index: 99; /* Make sure it does not overlap */
+  border: none; /* Remove borders */
+  outline: none; /* Remove outline */
+  background-color: rgb(195, 230, 203); /* Set a background color */
+  color: white; /* Text color */
+  cursor: pointer; /* Add a mouse pointer on hover */
+  padding: 5px; /* Some padding */
+  border-radius: 3px; /* Rounded corners */
+  font-size: 18px; /* Increase font size */
+  opacity: 0.8;
+}
+
+.btnScrollToTop:hover {
+  background-color: rgb(180, 215, 188);
+}
+
+.navbar-brand strong {
+  color:#fff !important;
+}
+
+.asset input {
+  display:none;
+}
+.asset img {
+  display:inline-block;
+  margin:0 10px;
+}
+
+footer .container {
+  padding:20px 0;
+}
+
+footer p {
+  color:#fff;
+}
+
+footer a {
+  color:rgb(195, 230, 203);
+}
+footer a:hover {
+  color:rgb(180, 215, 188);
+}
+
+.note-info {
+  border: 1px solid rgb(180, 215, 188);
+  background-color: #eee;
+  text-align: left;
+  display: block;
+  width: 400px;
+  padding: 10px 30px 0 !important;
+  margin: 0 auto;
+}
