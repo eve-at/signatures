@@ -2,6 +2,7 @@
 
 namespace App\Library;
 
+use App\Character;
 use GuzzleHttp;
 use Carbon\Carbon;
 use Mockery\Exception;
@@ -146,17 +147,16 @@ class EveApi_v2
     }
 
     /**
-     * Get Character Assets
-     * @see : http://eveonline-third-party-documentation.readthedocs.io/en/latest/xmlapi/character/char_assetlist.html
+     * Information about the characters current location.
+     * Returns the current solar system id, and also the current station or structure ID if applicable
+     * @see : https://esi.evetech.net/ui/#/Location/get_characters_character_id_location
      *
-     * @param string $characterId,
-     * @param string $accessToken,
+     * @param Character $character,
      * @return array|bool
      */
-    public static function getCharacterAssets($characterId, $accessToken)
+    public static function getCharacterLocation(Character $character)
     {
-
-        $url = static::$esiUrl . "characters/{$characterId}/assets/?datasource=tranquility&token={$accessToken}";
+        $url = static::$esiUrl . "characters/{$character->characterId}/location/?datasource=tranquility&token={$character->accessToken}";
 
         $client = new GuzzleHttp\Client();
         $response = $client->request('GET', $url, [
@@ -164,7 +164,7 @@ class EveApi_v2
         ]);
 
         if($response->getStatusCode() != 200) {
-            throw new Exception("Cannot obtain EVE Character assets list");
+            throw new Exception("Cannot obtain EVE Character location");
         }
 
         /* Example : $response->getBody()->getContents()
@@ -184,64 +184,4 @@ class EveApi_v2
         return json_decode($response->getBody()->getContents());
     }
 
-    /**
-     * Get Citadels names by id
-     *
-     * @param $arrIDs
-     * @return array
-     */
-    public static function getCitadelNames($arrIDs)
-    {
-
-        $arrNames = [];
-
-        foreach($arrIDs as $id) {
-            try {
-                $citadelDataJson = file_get_contents("https://stop.hammerti.me.uk/api/citadel/$id");
-                $data = json_decode($citadelDataJson);
-                $arrNames[$id] =  $data->{$id}->name;
-            } catch (\Exception $e) {
-                // do nothing
-            }
-        }
-
-        return $arrNames;
-    }
-
-    /**
-     * Get Types names
-     *
-     * @see https://esi.tech.ccp.is/ui/#/Universe/post_universe_names
-     * @see https://esi.tech.ccp.is/ui/#/Universe/get_universe_types_type_id
-     * @param array $arrNewItems
-     * @return array
-     */
-    public static function getTypeNames($arrTypesIds)
-    {
-        $client = new GuzzleHttp\Client();
-
-        $arrIDs = array_chunk($arrTypesIds, 1000);
-        $arrNames = [];
-        foreach($arrIDs as $arrChunk) {
-            try {
-                $response = $client->request('POST', static::$esiUrl . "universe/names/?datasource=tranquility", [
-                    "json" => $arrChunk,
-                ]);
-            } catch(RequestException $e) {
-                throw new Exception("Cannot obtain EVE Type names");
-            }
-
-            $statusCode = $response->getStatusCode();
-
-            if($statusCode != 200) {
-                throw new Exception("Cannot obtain EVE Type names");
-            }
-
-            foreach(json_decode($response->getBody()->getContents()) as $type) {
-                $arrNames[$type->id] = $type->name;
-            }
-        }
-
-        return $arrNames;
-    }
 }

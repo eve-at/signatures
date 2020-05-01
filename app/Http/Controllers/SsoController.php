@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Character;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use GuzzleHttp;
@@ -32,10 +33,10 @@ class SsoController extends Controller
 
         $arrTokens = EveApi_v2::getAccessToken($authCode);
 
-        Session::put(\Config::get('constants.eve_data_session_variable'), array_merge(
-            $arrTokens,
-            EveApi_v2::getCharacterId($arrTokens['accessToken'])
-        ));
+        $caracterInfo = array_merge($arrTokens, EveApi_v2::getCharacterId($arrTokens['accessToken']));
+
+        Session::put(\Config::get('constants.eve_data_session_variable'), $caracterInfo);
+        Character::updateInfo($caracterInfo);
 
         return redirect()->route('index');
     }

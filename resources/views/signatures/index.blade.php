@@ -3,7 +3,13 @@
 @section('content')
     <div class="container">
         <div class="row">
-            <th class="col-md-12">
+            <div class="col-md-12">
+                <div class="row">
+                    Name : {{ $character->characterName }} <img src="https://images.evetech.net/characters/{{ $character->characterId }}/portrait?size=64" alt="{{ $character->characterName }} portrait" width="64" height="64">
+                    Location: system {{ $system->systemName() }}, region {{ $system->regionName() }}, constellation {{ $system->constellationName() }}
+                </div>
+            </div>
+            <div class="col-md-12">
                 {!! Form::open(['route' => 'signatures.analyze', 'method' => 'put']) !!}
                     {{ csrf_field() }}
                     {{ Form::label('rawdata', 'Copy & paste scan data here') }}
