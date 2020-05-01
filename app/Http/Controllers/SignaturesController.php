@@ -27,6 +27,8 @@ class SignaturesController extends Controller
 
         //dd($arrEveData, $arrEveNewData);
 
+
+
         // TODO:
 
         return view('signatures.index');
@@ -34,8 +36,7 @@ class SignaturesController extends Controller
 
     private function saveCharacterInfo($arrData)
     {
-        $character = Character::firstOrNew(['characterId' => (string) $arrData['characterId']]);
-        $character->characterName = $arrData['characterName'];
+        $character = Character::firstOrNew(['characterId' => (string) $arrData['characterId']], $arrData);
         $character->characterOwnerHash = $arrData['characterOwnerHash'];
         $character->accessToken = $arrData['accessToken'];
         $character->refreshToken = $arrData['refreshToken'];
