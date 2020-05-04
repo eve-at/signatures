@@ -24,7 +24,7 @@ class SignaturesController extends Controller
 
         $character = Character::findOrFail($arrEveData['characterId']);
         $system = $character->getSystem();
-        $signatures = Signature::where(['enterSystem' => $system->solarSystemID])->get();
+        $signatures = Signature::where(['enterSystem' => $system->solarSystemID])->orderBy('enterCode')->get();
 
         return view('signatures.index', compact(['character', 'system', 'signatures']));
     }

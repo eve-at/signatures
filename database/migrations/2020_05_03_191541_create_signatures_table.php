@@ -23,6 +23,7 @@ class CreateSignaturesTable extends Migration
             $table->string('exitCode', 7)->nullable(); // for Wormholes
             $table->unsignedBigInteger('exitSystem')->nullable(); // for Wormholes
             $table->unsignedBigInteger('characterId');
+            $table->integer('rating')->default(0);
             $table->timestamps();
             $table->datetime('expires_at');
 
