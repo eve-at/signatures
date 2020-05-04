@@ -4,9 +4,9 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Constellation extends Model
+class Anomaly extends Model
 {
-    protected $primaryKey = 'constellationId';
+    protected $primaryKey = 'anomalyId';
     public $timestamps = false;
 
 }

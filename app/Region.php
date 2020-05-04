@@ -7,4 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Region extends Model
 {
     protected $primaryKey = 'regionId';
+    public $timestamps = false;
+
 }

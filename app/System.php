@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class System extends Model
 {
     protected $primaryKey = 'solarSystemId';
+    public $timestamps = false;
 
     public function systemName()
     {

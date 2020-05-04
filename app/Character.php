@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Session;
 class Character extends Model
 {
     protected $primaryKey = 'characterId';
+    public $timestamps = false;
 
     /**
      * The attributes that are mass assignable.
