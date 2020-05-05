@@ -26,7 +26,7 @@ class SignaturesController extends Controller
         $system = $character->getSystem();
         $signatures = Signature::where(['enterSystem' => $system->solarSystemID])->orderBy('enterCode')->get();
 
-        return view('signatures.index', compact(['character', 'system', 'signatures']));
+        return view('signatures.index', compact(['arrEveData', 'character', 'system', 'signatures']));
     }
 
     private function validateAndFilter($aSignature)

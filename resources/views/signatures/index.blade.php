@@ -13,7 +13,7 @@
                 @if ($signatures)
                     <label for="anomalyGroup">Filter by Group</label>
                     <select name="anomalyGroup" id="anomalyGroup">
-                        <option value="All">All</option>
+                        <option value="">All</option>
                         <option value="Wormhole">Wormhole</option>
                         <option value="Combat Site">Combat Site</option>
                         <option value="Ore Site">Ore Site</option>
@@ -21,6 +21,7 @@
                         <option value="Data Site">Data Site</option>
                         <option value="Relic Site">Relic Site</option>
                     </select>
+                    <span class="js-filter-info" style="display:none;"></span>
                     <table>
                         <thead>
                             <tr>
@@ -31,9 +32,9 @@
                                 <th rowspan="2">Updated</th>
                             </tr>
                             <tr>
-                                <th>Region</th>
-                                <th>System</th>
                                 <th>ID</th>
+                                <th>System</th>
+                                <th>Region</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -49,12 +50,40 @@
                                         endif;
                                     endif;
                                 @endphp
-                                <tr>
+                                <tr data-signature="{{ $signature->signatureId }}" data-anomalyGroup="{{ $signature->anomalyGroup }}">
                                     <td>{{ $signature->enterCode }}</td>
                                     <td>{{ $signature->anomalyGroup ?: '<not scanned>' }}</td>
-                                    <td>{{ $signature->exitSystem ? $signature->exitSystem->regionName() : '' }}</td>
-                                    <td>{{ $signature->exitSystem ? $signature->exitSystem->solarSystemName : '' }}</td>
-                                    <td>{{ $signature->exitCode }}</td>
+                                    <td>
+                                        @if ('Wormhole' == $signature->anomalyGroup)
+                                            @if ($arrEveData['characterId'] == $signature->characterId)
+                                                <input type="text"
+                                                       placeholder="Other side WH ID"
+                                                       name="exitCode_{{ $signature->exitCode }}"
+                                                       value="{{ $signature->exitSystem ? $signature->exitSystem->solarSystemName : '' }}">
+                                            @elseif ($signature->exitCode)
+                                                {{ $signature->exitCode }}
+                                                <span style="cursor:pointer;">+</span>&nbsp;<span style="cursor:pointer;">-</span>
+                                            @endif
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if ('Wormhole' == $signature->anomalyGroup)
+                                            @if ($arrEveData['characterId'] == $signature->characterId)
+                                                <input type="text"
+                                                       placeholder="Other side Solar System"
+                                                       name="exitSystem_{{ $signature->signatureId }}"
+                                                       value="{{ $signature->exitSystem ? $signature->exitSystem->solarSystemName : '' }}">
+                                            @elseif ($signature->exitSystem)
+                                                {{ $signature->exitSystem->solarSystemName }}
+                                                <span style="cursor:pointer;">+</span>&nbsp;<span style="cursor:pointer;">-</span>
+                                            @endif
+                                        @endif
+                                    </td>
+                                    <td data-region>
+                                        @if ('Wormhole' == $signature->anomalyGroup && $signature->exitSyste)
+                                            {{ $signature->exitSystem->regionName() }}
+                                        @endif
+                                    </td>
                                     <td>{{ $expires }}</td>
                                     <td>{{ $signature->character()->characterName }}, {{ \Carbon\Carbon::parse($signature->updated_at)->diffForHumans() }}</td>
                                 </tr>
@@ -78,7 +107,22 @@
 
 @section('view.scripts')
     <script>
-        $(document).ready(function(){
+        $(document).ready(function() {
+            $(document).on('change', '#anomalyGroup', function () {
+                if ($('#anomalyGroup').val()) {
+                    var trAll = $('tr[data-anomalyGroup]');
+                    var trToShow = $('tr[data-anomalyGroup="' + $('#anomalyGroup').val() + '"]');
+                    trAll.hide();
+                    trToShow.show();
+
+                    $('.js-filter-info').html((trAll.length - trToShow.length) + ' filtered out');
+                    $('.js-filter-info').show();
+                } else {
+                    $('tr[data-anomalyGroup]').show();
+                    $('.js-filter-info').hide();
+                }
+            });
+
             window.onscroll = function() {
                 if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
                     $('.btnScrollToTop').show();

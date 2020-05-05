@@ -106,7 +106,7 @@ class EveApi_v2
      */
     public static function refreshTokens($arrEveData)
     {
-        if(Carbon::now() < Carbon::createFromTimeString($arrEveData['expiresAt'])) {
+        if (Carbon::now() < Carbon::createFromTimeString($arrEveData['expiresAt'])) {
             return $arrEveData;
         };
 
