@@ -58,13 +58,23 @@
                                             @if ($arrEveData['characterId'] == $signature->characterId)
                                                 <div class="ui-widget">
                                                     <input type="text"
-                                                           class="js-anomalyId"
-                                                           placeholder="Wormhole ID, ex. K162"
-                                                           name="anomalyId_{{ $signature->signatureId }}"
-                                                           value="{{ $signature->wormhole() }}">
+                                                           class="js-enterAnomaly"
+                                                           placeholder="Wormhole ID, ex. N110"
+                                                           name="enterAnomaly_{{ $signature->signatureId }}"
+                                                           value="{{ $signature->enterAnomaly() }}">
+                                                </div>
+                                                <div class="ui-widget {{ ($signature->enterAnomaly() == "K162" ? '' : 'js-hidden') }}">
+                                                    <input type="text"
+                                                           class="js-exitAnomaly"
+                                                           placeholder="Other side ID ?, ex. N110"
+                                                           name="exitAnomaly_{{ $signature->signatureId }}"
+                                                           value="{{ $signature->exitAnomaly() }}">
                                                 </div>
                                             @elseif ($signature->anomalyId)
-                                                {{ $signature->wormhole() }}
+                                                {{ $signature->enterAnomaly() }}
+                                                @if ("K162" == $signature->enterAnomaly())
+                                                    leads to {{ $signature->exitAnomaly() }}
+                                                @endif
                                                 <span style="cursor:pointer;">+</span>&nbsp;<span style="cursor:pointer;">-</span>
                                             @endif
                                         </td>
@@ -73,7 +83,7 @@
                                                 <div class="ui-widget">
                                                     <input type="text"
                                                            class="js-exitCode"
-                                                           placeholder="Other side WH ID"
+                                                           placeholder="Other side WH ID, ex. ZFD-231"
                                                            name="exitCode_{{ $signature->signatureId }}"
                                                            value="{{ $signature->exitCode }}">
                                                 </div>
@@ -151,7 +161,7 @@
             });
 
             var anomalyId_cache = {};
-            $(".js-anomalyId").autocomplete({
+            $(".js-enterAnomaly,.js-exitAnomaly").autocomplete({
                 minLength: 1,
                 source: function( request, response ) {
                     var term = request.term;
@@ -175,6 +185,14 @@
                     }
                     event.target.value = ui.item.value;
                     ajaxSaveSignatureInfo(event);
+
+                    if (event.target.classList.contains('js-enterAnomaly')) {
+                        if (ui.item.value == "K162") {
+                            $(event.target).closest('td').find('.js-exitAnomaly').parent().removeClass('js-hidden');
+                        } else {
+                            $(event.target).closest('td').find('.js-exitAnomaly').parent().addClass('js-hidden');
+                        }
+                    }
                 }
             });
 

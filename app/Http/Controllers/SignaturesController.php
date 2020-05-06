@@ -35,7 +35,7 @@ class SignaturesController extends Controller
             return false;
         }
 
-        if (! in_array($aSignature['signatureGroup'], ['Cosmic Anomaly', 'Cosmic Signature'])) {
+        if (! in_array($aSignature['signatureGroup'], [ 'Cosmic Signature'])) { //'Cosmic Anomaly',
             return false;
         }
 
@@ -82,9 +82,10 @@ class SignaturesController extends Controller
                     'enterCode'   => $aLine['enterCode'],
                 ],
                 [
-                    'anomalyId' => null,
-                    'exitCode' => null,
                     'exitSystem' => null,
+                    'exitCode' => null,
+                    'enterAnomaly' => null,
+                    'exitAnomaly' => null,
                     'expires_at' => Carbon::now()->addWeek()->format('Y-m-d H:i:s'),
                 ]
             );
@@ -95,17 +96,8 @@ class SignaturesController extends Controller
                 $signature->expires_at = Carbon::parse($signature->created_at)->addDays(2)->format('Y-m-d H:i:s');
             }
 
-            // TODO: fill 'anomalyId'
-
             $signature->save();
         }
-
-
-        // TODO: find all "Cosmic Signature"
-        // TODO: Detect their type and name if scanned
-        // TODO: Add new to DB, remove old info from DB
-        // TODO: let user choose the name for the wormholes via auto-complete field
-        // TODO: save changes vis AJAX
 
         return redirect()->route('signatures');
     }

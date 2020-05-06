@@ -33,8 +33,13 @@ class Signature extends Model
         return $this->exitSystem ? System::find($this->exitSystem) : null;
     }
 
-    public function wormhole()
+    public function enterAnomaly()
     {
-        return $this->anomalyId ? Wormhole::find($this->anomalyId) : null;
+        return $this->enterAnomaly ? Wormhole::find($this->enterAnomaly) : null;
+    }
+
+    public function exitAnomaly()
+    {
+        return $this->exitAnomaly ? Wormhole::find($this->exitAnomaly) : null;
     }
 }

@@ -48,7 +48,7 @@ class AjaxController extends Controller
         }
         list($field, $signatureId) = $arr;
 
-        if (! in_array($field, ['anomalyId', 'exitCode', 'exitSystem'])) {
+        if (! in_array($field, ['enterAnomaly', 'exitAnomaly', 'exitCode', 'exitSystem'])) {
             return response()->json(['error' => 'Bad values'], 400);
         }
 
@@ -64,13 +64,14 @@ class AjaxController extends Controller
         }
 
         // 2.1 Set Wormhole
-        if ($field == "anomalyId") {
+        if (in_array($field , ['enterAnomaly', 'exitAnomaly'])) {
             $wormhole = Wormhole::where("wormholeName", "=", strtoupper($request->value))->first();
             if (! $wormhole) {
-                echo 'empty';
+                $signature->{$field} = null;
+                $signature->save();
                 return response()->json(['error' => 'Bad values'], 400);
             }
-            $signature->anomalyId = $wormhole->wormholeId;
+            $signature->{$field} = $wormhole->wormholeId;
             $signature->save();
 
             return response()->json(['status' => 'ok'], 200);
@@ -79,6 +80,8 @@ class AjaxController extends Controller
         // 2.2 Set exit code
         if ($field == "exitCode") {
             if (! preg_match('/^([A-Za-z]{3})(-\d{0,3}|$)$/', $request->value, $output)) {
+                $signature->exitCode = null;
+                $signature->save();
                 return response()->json(['error' => 'Bad values'], 400);
             }
             $signature->exitCode = $output[1] . (strlen($output[2] ?? '') == 4 ? $output[2] : '');
@@ -90,6 +93,8 @@ class AjaxController extends Controller
         // 2.3 Find System
         $system = System::where("solarSystemName", "=", $request->value)->first();
         if (! $system) {
+            $signature->null;
+            $signature->save();
             return response()->json(['error' => 'Bad values'], 400);
         }
         $signature->exitSystem = $system->solarSystemID;
