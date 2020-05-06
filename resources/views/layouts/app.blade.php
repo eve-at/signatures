@@ -15,7 +15,7 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     @yield('view.styles')
 
-    @include('partials.analytics')
+    {{--@include('partials.analytics')--}}
     @include('partials.adsense')
 </head>
 <body class="bg-dark">

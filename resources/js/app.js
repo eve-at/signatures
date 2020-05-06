@@ -9,6 +9,7 @@ require('./bootstrap');
 
 window.Vue = require('vue');
 
+import 'inputmask/lib/jquery.inputmask';
 import 'jquery-ui/ui/widgets/autocomplete.js';
 
 /**

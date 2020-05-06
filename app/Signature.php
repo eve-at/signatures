@@ -27,4 +27,14 @@ class Signature extends Model
     {
         return Character::find($this->characterId);
     }
+
+    public function exitSystem()
+    {
+        return $this->exitSystem ? System::find($this->exitSystem) : null;
+    }
+
+    public function wormhole()
+    {
+        return $this->anomalyId ? Wormhole::find($this->anomalyId) : null;
+    }
 }

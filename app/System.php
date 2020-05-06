@@ -23,4 +23,9 @@ class System extends Model
     {
         return Constellation::find($this->constellationID)->constellationName;
     }
+
+    public function __toString()
+    {
+        return $this->systemName();
+    }
 }
