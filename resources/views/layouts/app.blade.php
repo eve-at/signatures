@@ -15,9 +15,6 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     @yield('view.styles')
 
-    <!-- Scripts -->
-    <script src="/js/jquery-3.2.1.min.js"></script>
-
     @include('partials.analytics')
     @include('partials.adsense')
 </head>

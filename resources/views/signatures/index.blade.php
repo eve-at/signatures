@@ -56,10 +56,13 @@
                                     <td>
                                         @if ('Wormhole' == $signature->anomalyGroup)
                                             @if ($arrEveData['characterId'] == $signature->characterId)
-                                                <input type="text"
-                                                       placeholder="Other side WH ID"
-                                                       name="exitCode_{{ $signature->exitCode }}"
-                                                       value="{{ $signature->exitSystem ? $signature->exitSystem->solarSystemName : '' }}">
+                                                <div class="ui-widget">
+                                                    <input type="text"
+                                                           class="js-exitCode"
+                                                           placeholder="Other side WH ID"
+                                                           name="exitCode_{{ $signature->signatureId }}"
+                                                           value="{{ $signature->exitSystem ? $signature->exitSystem->solarSystemName : '' }}">
+                                                </div>
                                             @elseif ($signature->exitCode)
                                                 {{ $signature->exitCode }}
                                                 <span style="cursor:pointer;">+</span>&nbsp;<span style="cursor:pointer;">-</span>
@@ -69,10 +72,13 @@
                                     <td>
                                         @if ('Wormhole' == $signature->anomalyGroup)
                                             @if ($arrEveData['characterId'] == $signature->characterId)
-                                                <input type="text"
-                                                       placeholder="Other side Solar System"
-                                                       name="exitSystem_{{ $signature->signatureId }}"
-                                                       value="{{ $signature->exitSystem ? $signature->exitSystem->solarSystemName : '' }}">
+                                                <div class="ui-widget">
+                                                    <input type="text"
+                                                           class="js-exitSystem"
+                                                           placeholder="Other side Solar System"
+                                                           name="exitSystem_{{ $signature->signatureId }}"
+                                                           value="{{ $signature->exitSystem ? $signature->exitSystem->solarSystemName : '' }}">
+                                                </div>
                                             @elseif ($signature->exitSystem)
                                                 {{ $signature->exitSystem->solarSystemName }}
                                                 <span style="cursor:pointer;">+</span>&nbsp;<span style="cursor:pointer;">-</span>
@@ -120,6 +126,40 @@
                 } else {
                     $('tr[data-anomalyGroup]').show();
                     $('.js-filter-info').hide();
+                }
+            });
+
+            var exitCode_cache = {};
+            $(".js-exitCode").autocomplete({
+                minLength: 1,
+                source: function( request, response ) {
+                    var term = request.term;
+                    if ( term in exitCode_cache ) {
+                        response( exitCode_cache[ term ] );
+                        return;
+                    }
+
+                    $.getJSON( "{{ route('ajax.wormholes') }}", request, function( data, status, xhr ) {
+                        exitCode_cache[ term ] = data;
+                        response( data );
+                    });
+                }
+            });
+
+            var exitSystem_cache = {};
+            $(".js-exitSystem").autocomplete({
+                minLength: 3,
+                source: function( request, response ) {
+                    var term = request.term;
+                    if ( term in exitSystem_cache ) {
+                        response( exitSystem_cache[ term ] );
+                        return;
+                    }
+
+                    $.getJSON( "{{ route('ajax.systems') }}", request, function( data, status, xhr ) {
+                        exitSystem_cache[ term ] = data;
+                        response( data );
+                    });
                 }
             });
 

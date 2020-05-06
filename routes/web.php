@@ -18,3 +18,6 @@ Route::get('/sso', 'SsoController@index')->name('sso');
 
 Route::get('/signatures', 'SignaturesController@index')->name('signatures');
 Route::post('/signatures/analyze', 'SignaturesController@analyze')->name('signatures.analyze');
+
+Route::get('/ajax/wormholes', 'AjaxController@wormholes')->name('ajax.wormholes');
+Route::get('/ajax/systems', 'AjaxController@systems')->name('ajax.systems');
