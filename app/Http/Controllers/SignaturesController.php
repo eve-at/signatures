@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Storage;
 
 class SignaturesController extends Controller
 {
-
     protected $aErrors = [];
 
     public function index()
@@ -25,8 +24,10 @@ class SignaturesController extends Controller
         $character = Character::findOrFail($arrEveData['characterId']);
         $system = $character->getSystem();
         $signatures = Signature::where(['enterSystem' => $system->solarSystemID])->orderBy('enterCode')->get();
+        $anomalyStatic = $this->anomalyStatic;
+        $anomalyDynamic = $this->anomalyDynamic;
 
-        return view('signatures.index', compact(['arrEveData', 'character', 'system', 'signatures']));
+        return view('signatures.index', compact(['arrEveData', 'character', 'system', 'signatures', 'anomalyStatic', 'anomalyDynamic']));
     }
 
     private function validateAndFilter($aSignature)

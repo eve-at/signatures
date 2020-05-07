@@ -39,7 +39,7 @@ class AjaxController extends Controller
 
     public function signature(Request $request)
     {
-        if (! isset($request->field) || ! isset($request->value)) {
+        if (! isset($request->field)) {
             return response()->json(['error' => 'Missing fields'], 400);
         }
         $arr = explode('_', $request->field);
@@ -48,7 +48,11 @@ class AjaxController extends Controller
         }
         list($field, $signatureId) = $arr;
 
-        if (! in_array($field, ['enterAnomaly', 'exitAnomaly', 'exitCode', 'exitSystem'])) {
+        $anomalyInfo = array_merge($this->anomalyDynamic, $this->anomalyStatic);
+        $fieldsWhiteList = collect(array_keys($anomalyInfo))->map(function ($key) {
+            return 'anomaly' . $key;
+        })->merge(['enterAnomaly', 'exitAnomaly', 'exitCode', 'exitSystem'])->toArray();
+        if (! in_array($field, $fieldsWhiteList)) {
             return response()->json(['error' => 'Bad values'], 400);
         }
 
@@ -65,41 +69,84 @@ class AjaxController extends Controller
 
         // 2.1 Set Wormhole
         if (in_array($field , ['enterAnomaly', 'exitAnomaly'])) {
+            if (! $request->value) {
+                $signature->{$field} = null;
+                $signature->save();
+                return response()->json(['status' => 'ok'], 200);
+            }
+
             $wormhole = Wormhole::where("wormholeName", "=", strtoupper($request->value))->first();
             if (! $wormhole) {
                 $signature->{$field} = null;
                 $signature->save();
                 return response()->json(['error' => 'Bad values'], 400);
             }
+
             $signature->{$field} = $wormhole->wormholeId;
             $signature->save();
-
             return response()->json(['status' => 'ok'], 200);
         }
 
         // 2.2 Set exit code
         if ($field == "exitCode") {
+            if (! $request->value) {
+                $signature->exitCode = null;
+                $signature->save();
+                return response()->json(['status' => 'ok'], 200);
+            }
+
             if (! preg_match('/^([A-Za-z]{3})(-\d{0,3}|$)$/', $request->value, $output)) {
                 $signature->exitCode = null;
                 $signature->save();
                 return response()->json(['error' => 'Bad values'], 400);
             }
+
             $signature->exitCode = $output[1] . (strlen($output[2] ?? '') == 4 ? $output[2] : '');
             $signature->save();
-
             return response()->json(['status' => 'ok'], 200);
         }
 
         // 2.3 Find System
-        $system = System::where("solarSystemName", "=", $request->value)->first();
-        if (! $system) {
-            $signature->null;
+        if ($field == "exitSystem") {
+            if (! $request->value) {
+                $signature->exitSystem = null;
+                $signature->save();
+                return response()->json(['status' => 'ok'], 200);
+            }
+
+            $system = System::where("solarSystemName", "=", $request->value)->first();
+            if (! $system) {
+                $signature->exitSystem = null;
+                $signature->save();
+                return response()->json(['error' => 'Bad values'], 400);
+            }
+
+            $signature->exitSystem = $system->solarSystemID;
+            $signature->save();
+            return response()->json(['status' => 'ok'], 200);
+        }
+
+        // 2.4 Anomaly Info
+        $key = str_replace('anomaly', '', $field);
+        if (isset($anomalyInfo[$key])) {
+            if (! $request->value) {
+                $signature->{$field} = null;
+                $signature->save();
+                return response()->json(['status' => 'ok'], 200);
+            }
+
+            if (in_array($request->value, $anomalyInfo[$key])) {
+                $signature->{$field} = $request->value;
+                $signature->save();
+                return response()->json(['status' => 'ok'], 200);
+            }
+
+            $signature->{$field} = null;
             $signature->save();
             return response()->json(['error' => 'Bad values'], 400);
-        }
-        $signature->exitSystem = $system->solarSystemID;
-        $signature->save();
 
-        return response()->json(['status' => 'ok'], 200);
+        }
+
+        return response()->json(['error' => 'Bad values'], 400);
     }
 }

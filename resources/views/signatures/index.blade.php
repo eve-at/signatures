@@ -63,17 +63,42 @@
                                                            name="enterAnomaly_{{ $signature->signatureId }}"
                                                            value="{{ $signature->enterAnomaly() }}">
                                                 </div>
-                                                <div class="ui-widget {{ ($signature->enterAnomaly() == "K162" ? '' : 'js-hidden') }}">
-                                                    <input type="text"
-                                                           class="js-exitAnomaly"
-                                                           placeholder="Other side ID ?, ex. N110"
-                                                           name="exitAnomaly_{{ $signature->signatureId }}"
-                                                           value="{{ $signature->exitAnomaly() }}">
+                                                <div class="js-anomalyStaticInfo">
+                                                    @foreach ($anomalyDynamic as $anomalyInfoKey => $anomalyInfoValues)
+                                                        <label for="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}">{{ $anomalyInfoKey }}</label>
+                                                        <select name="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}" id="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}">
+                                                            <option value="">Select</option>
+                                                            @foreach ($anomalyInfoValues as $anomalyInfoValue)
+                                                                @php $selected = $signature->{'anomaly' . $anomalyInfoKey} === $anomalyInfoValue ? 'selected="selected"' : ''; @endphp
+                                                                <option value="{{ $anomalyInfoValue }}" {{ $selected }}>{{ $anomalyInfoValue }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    @endforeach
+                                                </div>
+                                                <div class="js-anomalyStaticInfo {{ ($signature->enterAnomaly() == "K162" ? '' : 'js-hidden') }}">
+                                                    <div class="ui-widget">
+                                                        <input type="text"
+                                                               class="js-exitAnomaly"
+                                                               placeholder="Other side ID ?, ex. N110"
+                                                               name="exitAnomaly_{{ $signature->signatureId }}"
+                                                               value="{{ $signature->exitAnomaly() }}">
+                                                    </div>
+                                                    OR<br>
+                                                    @foreach ($anomalyStatic as $anomalyInfoKey => $anomalyInfoValues)
+                                                        <label for="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}">{{ $anomalyInfoKey }}</label>
+                                                        <select name="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}" id="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}">
+                                                            <option value="">Select</option>
+                                                            @foreach ($anomalyInfoValues as $anomalyInfoValue)
+                                                                @php $selected = $signature->{'anomaly' . $anomalyInfoKey} === $anomalyInfoValue ? 'selected="selected"' : ''; @endphp
+                                                                <option value="{{ $anomalyInfoValue }}" {{ $selected }}>{{ $anomalyInfoValue }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    @endforeach
                                                 </div>
                                             @elseif ($signature->anomalyId)
                                                 {{ $signature->enterAnomaly() }}
                                                 @if ("K162" == $signature->enterAnomaly())
-                                                    leads to {{ $signature->exitAnomaly() }}
+                                                    leads to {{ $signature->exitAnomaly() ?? '' }}
                                                 @endif
                                                 <span style="cursor:pointer;">+</span>&nbsp;<span style="cursor:pointer;">-</span>
                                             @endif
@@ -188,9 +213,9 @@
 
                     if (event.target.classList.contains('js-enterAnomaly')) {
                         if (ui.item.value == "K162") {
-                            $(event.target).closest('td').find('.js-exitAnomaly').parent().removeClass('js-hidden');
+                            $(event.target).closest('td').find('.js-anomalyStaticInfo').removeClass('js-hidden');
                         } else {
-                            $(event.target).closest('td').find('.js-exitAnomaly').parent().addClass('js-hidden');
+                            $(event.target).closest('td').find('.js-anomalyStaticInfo').addClass('js-hidden');
                         }
                     }
                 }
@@ -252,7 +277,7 @@
                 });
             }
 
-            $(document).on('change', '.js-exitCode', ajaxSaveSignatureInfo); //,.js-exitSystem
+            $(document).on('change', '.js-exitCode,.js-anomalyDynamicInfo select,.js-anomalyStaticInfo select', ajaxSaveSignatureInfo); //,.js-exitSystem
             $(document).on('keypress', '.js-exitCode', function (event) { //,.js-exitSystem
                 if (event.keyCode === 13) {
                     event.preventDefault();
