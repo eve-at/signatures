@@ -17,7 +17,8 @@ class CreateRatingsTable extends Migration
             $table->bigIncrements('ratingId');
             $table->unsignedBigInteger('signatureId');
             $table->unsignedBigInteger('characterId');
-            $table->smallInteger('rating')->default(0);
+            $table->string('characterName');
+            $table->boolean('liked')->default(0);
             $table->timestamps();
 
             $table->foreign('signatureId')->references('signatureId')->on('signatures')->onDelete('cascade');

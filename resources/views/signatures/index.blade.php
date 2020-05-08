@@ -31,6 +31,7 @@
                                 <th colspan="2">Other side WH</th>
                                 <th rowspan="2">Estimated Life</th>
                                 <th rowspan="2">Updated</th>
+                                <th rowspan="2">Options</th>
                             </tr>
                             <tr>
                                 <th>ID</th>
@@ -38,12 +39,26 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($signatures as $signature)
+                            <?php foreach ($signatures as $signature): ?>
                                 @php
+                                    $ratings = [[],[]];
+                                    foreach ($signature['ratings'] as $rating):
+                                        // skip disliked signatures
+                                        if ($rating['characterId'] == $character->characterId && ! $rating['liked']):
+                                            continue 2;
+                                        endif;
+                                        $ratings[(int) $rating['liked']][] = [
+                                            'id' => $rating['characterId'],
+                                            'name' => $rating['characterName'],
+                                        ];
+                                    endforeach;
+
                                     $expires = '';
                                     if ("Wormhole" == $signature->anomalyGroup):
-                                        $expires = \Carbon\Carbon::now()->diffInHours(\Carbon\Carbon::parse($signature->expires_at));
-                                        if ($expires < 2):
+                                        $expires = \Carbon\Carbon::now()->diffInHours(\Carbon\Carbon::parse($signature->expires_at), false);
+                                        if ($expires < 0):
+                                            $expires = 'expired';
+                                        elseif ($expires < 2):
                                             $expires = '< an hour';
                                         else:
                                             $expires = '< ' . $expires . ' hours';
@@ -100,7 +115,6 @@
                                                 @if ("K162" == $signature->enterAnomaly())
                                                     leads to {{ $signature->exitAnomaly() ?? '' }}
                                                 @endif
-                                                <span style="cursor:pointer;">+</span>&nbsp;<span style="cursor:pointer;">-</span>
                                             @endif
                                         </td>
                                         <td>
@@ -114,7 +128,6 @@
                                                 </div>
                                             @elseif ($signature->exitCode)
                                                 {{ $signature->exitCode }}
-                                                <span style="cursor:pointer;">+</span>&nbsp;<span style="cursor:pointer;">-</span>
                                             @endif
                                         </td>
                                         <td>
@@ -128,7 +141,6 @@
                                                 </div>
                                             @elseif ($signature->exitSystem)
                                                 {{ $signature->exitSystem() }}
-                                                <span style="cursor:pointer;">+</span>&nbsp;<span style="cursor:pointer;">-</span>
                                             @endif
                                         </td>
                                     @else
@@ -136,8 +148,43 @@
                                     @endif
                                     <td>{{ $expires }}</td>
                                     <td>{{ $signature->character()->characterName }}, {{ \Carbon\Carbon::parse($signature->updated_at)->diffForHumans() }}</td>
+                                    <td>
+                                        @if ($arrEveData['characterId'] == $signature->characterId)
+                                            <a href="#" class="js-remove">Remove (expired)</a>
+                                        @else
+                                            @php
+                                                $dialogLike = "<ul>";
+                                                if (count($ratings[1])):
+                                                    foreach ($ratings[1] as $r):
+                                                        $dialogLike .= '<li><a href="https://evewho.com/character/' . $r['id'] . '" target="_blank"><img src="https://images.evetech.net/characters/' . $r['id'] . '/portrait?size=32" alt="' . $r['name'] . ' portrait" width="32" height="32">' . $r['name'] . '</a></li>';
+                                                    endforeach;
+                                                endif;
+                                                $dialogLike .= "</ul>";
+                                                $dialogDislike = "<ul>";
+                                                if (count($ratings[0])):
+                                                    foreach ($ratings[0] as $r):
+                                                        $dialogDislike .= '<li><a href="https://evewho.com/character/' . $r['id'] . '" target="_blank"><img src="https://images.evetech.net/characters/' . $r['id'] . '/portrait?size=32" alt="' . $r['name'] . ' portrait" width="32" height="32">' . $r['name'] . '</a></li>';
+                                                    endforeach;
+                                                endif;
+                                                $dialogDislike .= "</ul>";
+                                            @endphp
+                                            <a href="#" class="js-like">+1</a>
+                                            @if (count($ratings[1]))
+                                                &nbsp;
+                                                <span style="cursor: pointer;" class="js-dialogLike" data-like="1">({{ count($ratings[1]) }})</span>
+                                                <div class="js-dialog" data-like="1" title="Confirmed by" style="display:none;">{!! $dialogLike !!}</div>
+                                            @endif
+                                            &nbsp;/&nbsp;
+                                            <a href="#" class="js-dislike">-1</a>
+                                            @if (count($ratings[0]))
+                                                &nbsp;
+                                                <span style="cursor: pointer;" class="js-dialogLike" data-like="0">({{ count($ratings[0]) }})</span>
+                                                <div class="js-dialog" data-like="0" title="Disproved by" style="display:none;">{!! $dialogDislike !!}</div>
+                                            @endif
+                                        @endif
+                                    </td>
                                 </tr>
-                            @endforeach
+                            <?php endforeach; ?>
                         </tbody>
                     </table>
                 @endif
@@ -183,6 +230,11 @@
                     $('tr[data-anomalyGroup]').show();
                     $('.js-filter-info').hide();
                 }
+            });
+
+            $(document).on('click', '.js-dialogLike', function (event) {
+                console.log('.js-dialog[data-like="' + $(event.target).data('like') + '"]', $('.js-dialog [data-like="' + $(event.target).data('like') + '"]').length);
+                $('.js-dialog[data-like="' + $(event.target).data('like') + '"]').dialog();
             });
 
             var anomalyId_cache = {};
@@ -256,6 +308,49 @@
                     event.target.value = ui.item.value;
                     ajaxSaveSignatureInfo(event);
                 }
+            });
+
+            $(document).on('click', '.js-remove', function (event) {
+                event.preventDefault();
+
+                var tr = $(event.target).closest('tr');
+                $.ajax({
+                    url: "{{ route('ajax.signature.delete') }}",
+                    method: "DELETE",
+                    dataType: "json",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        "value": tr.data('signature'),
+                    }
+                }).done(function(data) {
+                    if (data.status == 'ok') {
+                        tr.hide("slow", function () {
+                            tr.remove();
+                        });
+                    }
+                });
+            });
+
+            $(document).on('click', '.js-like,.js-dislike', function (event) {
+                event.preventDefault();
+
+                var tr = $(event.target).closest('tr');
+                $.ajax({
+                    url: "{{ route('ajax.signature.like') }}",
+                    method: "POST",
+                    dataType: "json",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        "id": tr.data('signature'),
+                        "like": $(event.target).hasClass('js-like') ? 1 : 0,
+                    }
+                }).done(function(data) {
+                    if (data.status == 'ok') {
+                        $(event.target).hasClass('js-dislike') && tr.hide("slow", function () {
+                            tr.remove();
+                        });
+                    }
+                });
             });
 
             function ajaxSaveSignatureInfo(event) {

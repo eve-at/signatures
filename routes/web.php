@@ -22,3 +22,5 @@ Route::put('/signatures/analyze', 'SignaturesController@analyze')->name('signatu
 Route::get('/ajax/wormholes', 'AjaxController@wormholes')->name('ajax.wormholes');
 Route::get('/ajax/systems', 'AjaxController@systems')->name('ajax.systems');
 Route::put('/ajax/signature', 'AjaxController@signature')->name('ajax.signature');
+Route::delete('/ajax/signature', 'AjaxController@signatureDelete')->name('ajax.signature.delete');
+Route::post('/ajax/signature', 'AjaxController@signatureLike')->name('ajax.signature.like');

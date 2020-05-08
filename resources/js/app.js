@@ -11,6 +11,7 @@ window.Vue = require('vue');
 
 import 'inputmask/lib/jquery.inputmask';
 import 'jquery-ui/ui/widgets/autocomplete.js';
+import 'jquery-ui/ui/widgets/dialog.js';
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

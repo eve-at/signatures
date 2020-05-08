@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Signature extends Model
 {
     protected $primaryKey = 'signatureId';
-
     /**
      * The attributes that are mass assignable.
      *
@@ -22,6 +21,11 @@ class Signature extends Model
         'created_at',
         'expires_at',
     ];
+
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class, 'signatureId');
+    }
 
     public function character()
     {

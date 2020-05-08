@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Rating;
 use App\Signature;
 use App\System;
 use App\Wormhole;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
@@ -83,8 +85,20 @@ class AjaxController extends Controller
             }
 
             $signature->{$field} = $wormhole->wormholeId;
+
+            // Update expire date
+            if ($wormhole->maxStableTime > 0) {
+                $signature->expires_at = Carbon::parse($signature->created_at)->addHours($wormhole->maxStableTime)->toDateTimeString();
+            }
+
             $signature->save();
-            return response()->json(['status' => 'ok'], 200);
+
+            $data = [
+                'Size'  => $wormhole->wormholeSize(),
+                'Class' => $wormhole->wormholeClass(),
+            ];
+
+            return response()->json(['status' => 'ok', 'data' => $data], 200);
         }
 
         // 2.2 Set exit code
@@ -129,16 +143,26 @@ class AjaxController extends Controller
         // 2.4 Anomaly Info
         $key = str_replace('anomaly', '', $field);
         if (isset($anomalyInfo[$key])) {
+            $data = [
+                'Size'  => '',
+                'Class' => '',
+            ];
             if (! $request->value) {
                 $signature->{$field} = null;
                 $signature->save();
-                return response()->json(['status' => 'ok'], 200);
+                return response()->json(['status' => 'ok', 'data' => $data], 200);
             }
 
             if (in_array($request->value, $anomalyInfo[$key])) {
                 $signature->{$field} = $request->value;
                 $signature->save();
-                return response()->json(['status' => 'ok'], 200);
+
+                // TODO:
+                $data = [
+                    'Size'  => '',
+                    'Class' => '',
+                ];
+                return response()->json(['status' => 'ok', 'data' => $data], 200);
             }
 
             $signature->{$field} = null;
@@ -148,5 +172,61 @@ class AjaxController extends Controller
         }
 
         return response()->json(['error' => 'Bad values'], 400);
+    }
+
+    public function signatureDelete(Request $request)
+    {
+        if (! isset($request->value)) {
+            return response()->json(['error' => 'Missing fields'], 400);
+        }
+
+        $arrEveData = Session::get(\Config::get('constants.eve_data_session_variable'));
+
+        // can remove only own signatures
+        $signature = Signature::where([
+            ["characterId", "=", $arrEveData['characterId']],
+            ["signatureId", "=", $request->value],
+        ])->first();
+        if (! $signature) {
+            return response()->json(['error' => 'Bad values'], 400);
+        }
+
+        $signature->forceDelete();
+
+        return response()->json(['status' => 'ok'], 200);
+    }
+
+
+    public function signatureLike(Request $request)
+    {
+        if (! isset($request->id) || ! isset($request->like)) {
+            return response()->json(['error' => 'Missing fields'], 400);
+        }
+
+        $arrEveData = Session::get(\Config::get('constants.eve_data_session_variable'));
+
+        $signature = Signature::where([
+            ["signatureId", "=", $request->id],
+        ])->first();
+        if (! $signature) {
+            return response()->json(['error' => 'Bad values'], 400);
+        }
+
+        // can't rate your own signature
+        if ($signature->characterId == $arrEveData['characterId']) {
+            return response()->json(['error' => 'Bad values'], 400);
+        }
+
+        $rating = Rating::firstOrNew([
+            ["characterId", "=", $arrEveData['characterId']],
+            ["signatureId", "=", $signature->signatureId],
+        ]);
+        $rating->characterId = $arrEveData['characterId'];
+        $rating->signatureId = $signature->signatureId;
+        $rating->characterName = $arrEveData['characterName'];
+        $rating->liked = !! $request->like;
+        $rating->save();
+
+        return response()->json(['status' => 'ok'], 200);
     }
 }
