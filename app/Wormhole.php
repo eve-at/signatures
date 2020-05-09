@@ -30,8 +30,12 @@ class Wormhole extends Model
         return "S";
     }
 
-    public function wormholeClass()
+    public function wormholeClass($short = false)
     {
+        if ($short) {
+            return str_replace("W-space", "", ucfirst($this->systemType) . str_replace("Class ", "C", $this->systemTypeClass));
+        }
+
         $classes = [
             'hi-sec_' => 'Hisec',
             'low-sec_' => 'Lowsec',

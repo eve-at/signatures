@@ -74,14 +74,20 @@
                                                 <div class="ui-widget">
                                                     <input type="text"
                                                            class="js-enterAnomaly"
+                                                           data-value="{{ $signature->enterAnomaly() }}"
+                                                           data-size="{{ $signature->enterAnomaly() ? $signature->enterAnomaly()->wormholeSize() : ''  }}"
+                                                           data-class="{{ $signature->enterAnomaly() ? $signature->enterAnomaly()->wormholeClass(true) : '' }}"
                                                            placeholder="Wormhole ID, ex. N110"
                                                            name="enterAnomaly_{{ $signature->signatureId }}"
                                                            value="{{ $signature->enterAnomaly() }}">
                                                 </div>
-                                                <div class="js-anomalyStaticInfo">
+                                                <div class="js-anomalyDynamicInfo">
                                                     @foreach ($anomalyDynamic as $anomalyInfoKey => $anomalyInfoValues)
                                                         <label for="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}">{{ $anomalyInfoKey }}</label>
-                                                        <select name="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}" id="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}">
+                                                        <select name="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}"
+                                                                class="js-anomaly{{ $anomalyInfoKey }}"
+                                                                data-value="{{ $signature->{'anomaly' . $anomalyInfoKey} }}"
+                                                                id="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}">
                                                             <option value="">Select</option>
                                                             @foreach ($anomalyInfoValues as $anomalyInfoValue)
                                                                 @php $selected = $signature->{'anomaly' . $anomalyInfoKey} === $anomalyInfoValue ? 'selected="selected"' : ''; @endphp
@@ -94,6 +100,9 @@
                                                     <div class="ui-widget">
                                                         <input type="text"
                                                                class="js-exitAnomaly"
+                                                               data-value="{{ $signature->exitAnomaly() }}"
+                                                               data-size="{{ $signature->exitAnomaly() ? $signature->exitAnomaly()->wormholeSize() : ''  }}"
+                                                               data-class="{{ $signature->exitAnomaly() ? $signature->exitAnomaly()->wormholeClass(true) : '' }}"
                                                                placeholder="Other side ID ?, ex. N110"
                                                                name="exitAnomaly_{{ $signature->signatureId }}"
                                                                value="{{ $signature->exitAnomaly() }}">
@@ -101,7 +110,10 @@
                                                     OR<br>
                                                     @foreach ($anomalyStatic as $anomalyInfoKey => $anomalyInfoValues)
                                                         <label for="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}">{{ $anomalyInfoKey }}</label>
-                                                        <select name="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}" id="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}">
+                                                        <select name="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}"
+                                                                class="js-anomaly{{ $anomalyInfoKey }}"
+                                                                data-value="{{ $signature->{'anomaly' . $anomalyInfoKey} }}"
+                                                                id="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}">
                                                             <option value="">Select</option>
                                                             @foreach ($anomalyInfoValues as $anomalyInfoValue)
                                                                 @php $selected = $signature->{'anomaly' . $anomalyInfoKey} === $anomalyInfoValue ? 'selected="selected"' : ''; @endphp
@@ -116,6 +128,7 @@
                                                     leads to {{ $signature->exitAnomaly() ?? '' }}
                                                 @endif
                                             @endif
+                                            <span class="js-anomalySummary"></span>
                                         </td>
                                         <td>
                                             @if ($arrEveData['characterId'] == $signature->characterId)
@@ -123,6 +136,7 @@
                                                     <input type="text"
                                                            class="js-exitCode"
                                                            placeholder="Other side WH ID, ex. ZFD-231"
+                                                           data-value="{{ $signature->exitCode }}"
                                                            name="exitCode_{{ $signature->signatureId }}"
                                                            value="{{ $signature->exitCode }}">
                                                 </div>
@@ -136,6 +150,7 @@
                                                     <input type="text"
                                                            class="js-exitSystem"
                                                            placeholder="Other side Solar System"
+                                                           data-value="{{ $signature->exitSystem() }}"
                                                            name="exitSystem_{{ $signature->signatureId }}"
                                                            value="{{ $signature->exitSystem() }}">
                                                 </div>
@@ -216,6 +231,58 @@
                     return pastedValue.toUpperCase();
                 },
             });
+
+            function updateSummary(tr) {
+                var enterAnomaly = tr.find('.js-enterAnomaly');
+                var exitAnomaly = tr.find('.js-exitAnomaly');
+                var anomalyMass = tr.find('.js-anomalyMass').data('value');
+                var anomalyTime = tr.find('.js-anomalyTime').data('value');
+                var anomalySize = tr.find('.js-anomalySize').data('value');
+                var anomalyClass = tr.find('.js-anomalyClass').data('value');
+
+                var staticData = [];
+                if (anomalyClass.length) {
+                    staticData.push('to ' + anomalyClass);
+                }
+                if (anomalySize.length) {
+                    staticData.push('Size: ' + anomalySize);
+                }
+
+                var summary = [''];
+                if (enterAnomaly.data('value').length) {
+                    summary[0] += enterAnomaly.data('value');
+                    if (enterAnomaly.data('value') === 'K162') {
+                        summary[0] += "->";
+                        if (exitAnomaly.data('value').length) {
+                            summary[0] += exitAnomaly.data('value');
+
+                            staticData = [];
+                            staticData.push('to ' + exitAnomaly.data('class'));
+                            staticData.push('Size: ' + exitAnomaly.data('size'));
+                        } else {
+                            summary[0] += '?';
+                        }
+                    } else {
+                        staticData = [];
+                        staticData.push('to ' + enterAnomaly.data('class'));
+                        staticData.push('Size: ' + enterAnomaly.data('size'));
+                    }
+                }
+
+                if (staticData) {
+                    summary.push(staticData.join(', '));
+                }
+
+                if (anomalyMass.length) {
+                    summary.push('Mass: ' + anomalyMass);
+                }
+
+                if (anomalyTime.length) {
+                    summary.push('Time: ' + anomalyTime);
+                }
+
+                tr.find('.js-anomalySummary').html(summary.join(', '));
+            }
 
             $(document).on('change', '#anomalyGroup', function () {
                 if ($('#anomalyGroup').val()) {
@@ -355,7 +422,10 @@
 
             function ajaxSaveSignatureInfo(event) {
                 var element = $(event.target);
-                console.log('element', element, element.data('solarSystemId'));
+
+                element.data('value', element.val());
+
+                var tr = $(event.target).closest('tr');
 
                 $.ajax({
                     url: "{{ route('ajax.signature') }}",
@@ -367,8 +437,23 @@
                         "value": element.val(),
                     }
                 }).done(function(data) {
-                    console.log(data);
-                    $( this ).addClass( "done" );
+                    if (data.status == 'ok') {
+                        tr.find('.js-anomalySize').val(data.data.Size).data('value', data.data.Size);
+                        tr.find('.js-anomalyClass').val(data.data.ClassGrouped).data('value', data.data.ClassGrouped);
+                        if ($(event.target).hasClass('js-enterAnomaly')) {
+                            tr.find('.js-exitAnomaly').data('value', data.data.AnotherSideWormhole)
+                                .val(data.data.AnotherSideWormhole);
+                            $(event.target).data('size', data.data.Size)
+                                .data('class', data.data.Class);
+                        } else {
+                            tr.find('.js-enterAnomaly').data('value', data.data.AnotherSideWormhole)
+                                .val(data.data.AnotherSideWormhole);
+                            $(event.target).data('size', data.data.Size)
+                                .data('class', data.data.Class);
+                        }
+
+                        updateSummary(tr);
+                    }
                 });
             }
 

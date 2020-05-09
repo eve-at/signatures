@@ -71,8 +71,16 @@ class AjaxController extends Controller
 
         // 2.1 Set Wormhole
         if (in_array($field , ['enterAnomaly', 'exitAnomaly'])) {
+            $k162 = Wormhole::where("wormholeName", "=", "K162")->first();
+
             if (! $request->value) {
                 $signature->{$field} = null;
+
+                if (! $signature->enterAnomaly && ! $signature->exitAnomaly) {
+                    $signature->anomalySize = null;
+                    $signature->anomalyClass = null;
+                }
+
                 $signature->save();
                 return response()->json(['status' => 'ok'], 200);
             }
@@ -80,11 +88,29 @@ class AjaxController extends Controller
             $wormhole = Wormhole::where("wormholeName", "=", strtoupper($request->value))->first();
             if (! $wormhole) {
                 $signature->{$field} = null;
+
+                if (! $signature->enterAnomaly && ! $signature->exitAnomaly) {
+                    $signature->anomalySize = null;
+                    $signature->anomalyClass = null;
+                }
+
                 $signature->save();
                 return response()->json(['error' => 'Bad values'], 400);
             }
 
             $signature->{$field} = $wormhole->wormholeId;
+
+            // set another side WH
+            $anotherSideTitle = ($field == 'enterAnomaly') ? 'exitAnomaly' : 'enterAnomaly';
+            if ($wormhole->wormholeId == $k162->wormholeId) {
+                if ($signature->{$anotherSideTitle} == $k162->wormholeId) {
+                    $signature->{$anotherSideTitle} = null;
+                }
+            } else {
+                $signature->anomalySize = $wormhole->wormholeSize();
+                $signature->anomalyClass = $wormhole->wormholeClass();
+                $signature->{$anotherSideTitle} = $k162->wormholeId;
+            }
 
             // Update expire date
             if ($wormhole->maxStableTime > 0) {
@@ -93,9 +119,12 @@ class AjaxController extends Controller
 
             $signature->save();
 
+            $anotherSideWormhole = $signature->{$anotherSideTitle}();
             $data = [
                 'Size'  => $wormhole->wormholeSize(),
-                'Class' => $wormhole->wormholeClass(),
+                'Class' => $wormhole->wormholeClass(true),
+                'ClassGrouped' => $wormhole->wormholeClass(),
+                'AnotherSideWormhole' => $anotherSideWormhole ? $anotherSideWormhole->wormholeName : '',
             ];
 
             return response()->json(['status' => 'ok', 'data' => $data], 200);
