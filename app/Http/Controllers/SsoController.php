@@ -33,10 +33,10 @@ class SsoController extends Controller
 
         $arrTokens = EveApi_v2::getAccessToken($authCode);
 
-        $caracterInfo = array_merge($arrTokens, EveApi_v2::getCharacterId($arrTokens['accessToken']));
+        $characterInfo = array_merge($arrTokens, EveApi_v2::getCharacterId($arrTokens['accessToken']));
 
-        Session::put(\Config::get('constants.eve_data_session_variable'), $caracterInfo);
-        Character::updateInfo($caracterInfo);
+        Session::put(\Config::get('constants.eve_data_session_variable'), $characterInfo);
+        Character::updateInfo($characterInfo);
 
         return redirect()->route('index');
     }

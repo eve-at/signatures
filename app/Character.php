@@ -43,6 +43,7 @@ class Character extends Model
     {
         $arrEveData = Session::get(\Config::get('constants.eve_data_session_variable'));
         $arrEveNewData = EveApi_v2::refreshTokens($arrEveData);
+
         if ($arrEveNewData['accessToken'] !== $arrEveData['accessToken']) {
             $arrEveNewData = array_merge($arrEveNewData, EveApi_v2::getCharacterId($arrEveNewData['accessToken']));
             Session::put(\Config::get('constants.eve_data_session_variable'), $arrEveNewData);
@@ -55,7 +56,7 @@ class Character extends Model
     public function getSystem()
     {
         $this->updateAccessToken();
-        $location = EveApi_v2::getCharacterLocation($this);
+        $location = EveApi_v2::getCharacterLocation();
 
         return System::find($location->solar_system_id);
 

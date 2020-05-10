@@ -6,6 +6,7 @@ use App\Character;
 use GuzzleHttp;
 use Carbon\Carbon;
 use Mockery\Exception;
+use Illuminate\Support\Facades\Session;
 
 /**
  * Class EveApi_v2
@@ -154,9 +155,11 @@ class EveApi_v2
      * @param Character $character,
      * @return array|bool
      */
-    public static function getCharacterLocation(Character $character)
+    public static function getCharacterLocation()
     {
-        $url = static::$esiUrl . "characters/{$character->characterId}/location/?datasource=tranquility&token={$character->accessToken}";
+        $arrEveData = Session::get(\Config::get('constants.eve_data_session_variable'));
+
+        $url = static::$esiUrl . "characters/{$arrEveData['characterId']}/location/?datasource=tranquility&token={$arrEveData['accessToken']}";
 
         $client = new GuzzleHttp\Client();
         $response = $client->request('GET', $url, [
