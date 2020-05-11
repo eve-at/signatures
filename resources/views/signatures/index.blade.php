@@ -135,7 +135,7 @@
                                                     leads to {{ $signature->exitAnomaly() ?? '' }}
                                                 @endif
                                             @endif
-                                            <span class="js-anomalySummary"></span>
+                                            <span class="js-anomalySummary">{{ $signature->summary() }}</span>
                                         </td>
                                         <td>
                                             @if ($arrEveData['characterId'] == $signature->characterId)
