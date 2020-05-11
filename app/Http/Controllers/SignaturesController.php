@@ -7,6 +7,7 @@ use App\Library\EveApi_v2;
 use App\Signature;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 
@@ -33,22 +34,34 @@ class SignaturesController extends Controller
     private function validateAndFilter($aSignature)
     {
         if (1 !== preg_match('/([A-Z]{3}-\d{3})/', $aSignature['enterCode'], $output_array)) {
-            return false;
+            return [
+                'status' => 'error',
+                'message' => 'Wrong format. Make sure you copy scanner data.',
+            ];
         }
 
         if (! in_array($aSignature['signatureGroup'], [ 'Cosmic Signature'])) { //'Cosmic Anomaly',
-            return false;
+            return [
+                'status' => 'error',
+                'message' => 'Cosmic Signatures are not supported',
+            ];
         }
 
         if ($aSignature['anomalyGroup']
             && ! in_array($aSignature['anomalyGroup'], ['Combat Site', 'Ore Site', 'Gas Site', 'Data Site', 'Relic Site', 'Wormhole'])) {
-            return false;
+            return [
+                'status' => 'error',
+                'message' => 'Wrong format. Make sure you copy scanner data.',
+            ];
         }
 
         // TODO: validate $aSignature['anomalyName']
         $aSignature['anomalyName'] = null;
 
-        return $aSignature;
+        return [
+            'status' => 'ok',
+            'signature' => $aSignature,
+        ];
     }
 
     public function analyze(Request $request)
@@ -70,11 +83,12 @@ class SignaturesController extends Controller
             $aLine = array_combine(['enterCode', 'signatureGroup', 'anomalyGroup', 'anomalyName', 'signal', 'distance'], $aLine);
             //dd($this->aErrors, explode("\t", $lines[0]), $lines, $aLine);
 
-            $aLine = $this->validateAndFilter($aLine);
-            if (! $aLine) {
-                $this->aErrors[] = "Line $index skipped: wrong format. Make sure you copy scanner data";
+            $result = $this->validateAndFilter($aLine);
+            if ($result['status'] == 'error') {
+                $this->aErrors[] = "Line $index skipped: " . $result['message'];
                 continue;
             }
+            $aLine = $result['signature'];
 
             $signature = Signature::firstOrNew(
                 [
@@ -100,6 +114,7 @@ class SignaturesController extends Controller
             $signature->save();
         }
 
-        return redirect()->route('signatures');
+        return redirect()->route('signatures')->with('errors', $this->aErrors);
+        //return Redirect::action('MembersController@loadRegisterView');
     }
 }

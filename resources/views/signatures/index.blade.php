@@ -2,6 +2,13 @@
 
 @section('content')
     <div class="container">
+        @if (isset($errors) && count($errors))
+            <ul>
+                @foreach($errors as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        @endif
         <div class="row">
             <div class="col-md-12">
                 <div class="row">
@@ -283,6 +290,10 @@
 
                 tr.find('.js-anomalySummary').html(summary.join(', '));
             }
+
+            $('tr[data-anomalygroup="Wormhole"]').each(function () {
+                updateSummary($(this));
+            });
 
             $(document).on('change', '#anomalyGroup', function () {
                 if ($('#anomalyGroup').val()) {
