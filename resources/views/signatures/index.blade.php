@@ -255,9 +255,9 @@
                     staticData.push('Size: ' + anomalySize);
                 }
 
-                var summary = [''];
+                var summary = [];
                 if (enterAnomaly.data('value').length) {
-                    summary[0] += enterAnomaly.data('value');
+                    summary[0] = enterAnomaly.data('value');
                     if (enterAnomaly.data('value') === 'K162') {
                         summary[0] += "->";
                         if (exitAnomaly.data('value').length) {
@@ -276,7 +276,7 @@
                     }
                 }
 
-                if (staticData) {
+                if (staticData.length) {
                     summary.push(staticData.join(', '));
                 }
 
