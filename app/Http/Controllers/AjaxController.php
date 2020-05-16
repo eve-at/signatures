@@ -76,7 +76,7 @@ class AjaxController extends Controller
             if (! $request->value) {
                 $signature->{$field} = null;
 
-                if (! $signature->enterAnomaly && ! $signature->exitAnomaly) {
+                if (! $signature->enterAnomaly || ($signature->enterAnomaly == $k162->wormholeId && ! $signature->exitAnomaly)) {
                     $signature->anomalySize = null;
                     $signature->anomalyClass = null;
                 }
@@ -121,9 +121,9 @@ class AjaxController extends Controller
 
             $anotherSideWormhole = $signature->{$anotherSideTitle}();
             $data = [
-                'Size'  => $wormhole->wormholeSize(),
+                //'Size'  => $wormhole->wormholeSize(),
                 'Class' => $wormhole->wormholeClass(true),
-                'ClassGrouped' => $wormhole->wormholeClass(),
+                //'ClassGrouped' => $wormhole->wormholeClass(),
                 'AnotherSideWormhole' => $anotherSideWormhole ? $anotherSideWormhole->wormholeName : '',
             ];
 

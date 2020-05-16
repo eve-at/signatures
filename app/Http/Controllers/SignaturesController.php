@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Character;
 use App\Library\EveApi_v2;
 use App\Signature;
+use App\Wormhole;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -27,8 +28,9 @@ class SignaturesController extends Controller
         $signatures = Signature::with('ratings')->where(['enterSystem' => $system->solarSystemID])->orderBy('enterCode')->get();
         $anomalyStatic = $this->anomalyStatic;
         $anomalyDynamic = $this->anomalyDynamic;
+        $wormholes = Wormhole::orderBy('wormholeName')->get();
 
-        return view('signatures.index', compact(['arrEveData', 'character', 'system', 'signatures', 'anomalyStatic', 'anomalyDynamic']));
+        return view('signatures.index', compact(['arrEveData', 'character', 'system', 'signatures', 'anomalyStatic', 'anomalyDynamic', 'wormholes']));
     }
 
     private function validateAndFilter($aSignature)
