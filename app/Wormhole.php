@@ -57,4 +57,16 @@ class Wormhole extends Model
     {
         return $this->wormholeName;
     }
+
+    public function toArray()
+    {
+        return array_merge(
+            parent::toArray(),
+            [
+                'wormholeSize' => $this->wormholeSize(),
+                'wormholeClass' => $this->wormholeClass(),
+                'wormholeClassShort' => $this->wormholeClass(true),
+            ]
+        );
+    }
 }

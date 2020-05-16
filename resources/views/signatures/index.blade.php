@@ -256,40 +256,40 @@
             });
 
             function updateSummary(tr) {
-                return '';
-                var enterAnomaly = tr.find('.js-enterAnomaly');
-                var exitAnomaly = tr.find('.js-exitAnomaly');
-                var anomalyMass = tr.find('.js-anomalyMass').data('value');
-                var anomalyTime = tr.find('.js-anomalyTime').data('value');
-                var anomalySize = tr.find('.js-anomalySize').data('value');
-                var anomalyClass = tr.find('.js-anomalyClass').data('value');
+                var enterAnomaly = tr.find('.js-enterAnomaly').val();
+                var exitAnomaly = tr.find('.js-exitAnomaly').val();
+                var anomalyMass = tr.find('.js-anomalyMass').val();
+                var anomalyTime = tr.find('.js-anomalyTime').val();
+                var anomalySize = tr.find('.js-anomalySize').val();
+                var anomalyClass = tr.find('.js-anomalyClass').val();
 
                 var staticData = [];
-                if (anomalyClass.length) {
+                if (anomalyClass) {
                     staticData.push('to ' + anomalyClass);
                 }
-                if (anomalySize.length) {
+                if (anomalySize) {
                     staticData.push('Size: ' + anomalySize);
                 }
 
+                console.log(enterAnomaly, exitAnomaly, anomalyClass, anomalySize, staticData);
                 var summary = [];
-                if (enterAnomaly.val().length) {
-                    summary[0] = enterAnomaly.val();
-                    if (enterAnomaly.val() === 'K162') {
+                if (enterAnomaly.length) {
+                    summary[0] = enterAnomaly;
+                    if (enterAnomaly === 'K162') {
                         summary[0] += "->";
-                        if (exitAnomaly.val().length) {
-                            summary[0] += exitAnomaly.val();
+                        if (exitAnomaly) {
+                            summary[0] += exitAnomaly;
 
                             staticData = [];
-                            staticData.push('to ' + exitAnomaly.data('class'));
-                            staticData.push('Size: ' + exitAnomaly.data('size'));
+                            staticData.push('to ' + wormholes[exitAnomaly].wormholeClassShort);
+                            staticData.push('Size: ' + wormholes[exitAnomaly].wormholeSize);
                         } else {
                             summary[0] += '?';
                         }
                     } else {
                         staticData = [];
-                        staticData.push('to ' + enterAnomaly.data('class'));
-                        staticData.push('Size: ' + enterAnomaly.data('size'));
+                        staticData.push('to ' + wormholes[enterAnomaly].wormholeClassShort);
+                        staticData.push('Size: ' + wormholes[enterAnomaly].wormholeSize);
                     }
                 }
 
@@ -312,10 +312,10 @@
                 updateSummary($(this));
             });
 
-            $(document).on('change', '#anomalyGroup', function () {
-                if ($('#anomalyGroup').val()) {
+            $(document).on('change', '#anomalyGroup', function (event) {
+                if ($(event.target).val()) {
                     var trAll = $('tr[data-anomalyGroup]');
-                    var trToShow = $('tr[data-anomalyGroup="' + $('#anomalyGroup').val() + '"]');
+                    var trToShow = $('tr[data-anomalyGroup="' + $(event.target).val() + '"]');
                     trAll.hide();
                     trToShow.show();
 
@@ -462,7 +462,7 @@
                     }
                 }).done(function(data) {
                     if (data.status == 'ok') {
-                        tr.find('.js-anomalySize').val(data.data.Size).data('value', data.data.Size);
+                        /*tr.find('.js-anomalySize').val(data.data.Size).data('value', data.data.Size);
                         tr.find('.js-anomalyClass').val(data.data.ClassGrouped).data('value', data.data.ClassGrouped);
                         if ($(event.target).hasClass('js-enterAnomaly')) {
                             tr.find('.js-exitAnomaly').data('value', data.data.AnotherSideWormhole)
@@ -474,7 +474,7 @@
                                 .val(data.data.AnotherSideWormhole);
                             $(event.target).data('size', data.data.Size)
                                 .data('class', data.data.Class);
-                        }
+                        }*/
 
                         updateSummary(tr);
                     }
