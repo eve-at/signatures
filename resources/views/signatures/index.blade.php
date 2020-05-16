@@ -81,37 +81,17 @@
                                         @endphp
                                         @if ($arrEveData['characterId'] == $signature->characterId)
                                             <td>
-                                                {{--<div class="ui-widget">
-                                                    <input type="text"
-                                                           class="js-enterAnomaly"
-                                                           data-value="{{ $signature->enterAnomaly() }}"
-                                                           data-size="{{ $signature->enterAnomaly() ? $signature->enterAnomaly()->wormholeSize() : ''  }}"
-                                                           data-class="{{ $signature->enterAnomaly() ? $signature->enterAnomaly()->wormholeClass(true) : '' }}"
-                                                           placeholder="Wormhole ID, ex. N110"
-                                                           name="enterAnomaly_{{ $signature->signatureId }}"
-                                                           value="{{ $signature->enterAnomaly() }}">
-                                                </div>--}}
                                                 <label for="enterAnomaly_{{ $signature->signatureId }}">Enter WH</label>
-                                                <select class="js-enterAnomaly" name="enterAnomaly_{{ $signature->signatureId }}" id="enterAnomaly_{{ $signature->signatureId }}">
-                                                    <option value="">--- Select ---</option>
+                                                <select class="js-enterAnomaly chosen-select" name="enterAnomaly_{{ $signature->signatureId }}" id="enterAnomaly_{{ $signature->signatureId }}">
+                                                    <option value="">Select an option</option>
                                                     @foreach ($wormholes as $wormhole)
                                                         <option value="{{ $wormhole->wormholeName }}" {{ $signature->enterAnomaly() == $wormhole->wormholeName ? 'selected' : '' }}>{{ $wormhole->wormholeName }}</option>
                                                     @endforeach
                                                 </select>
                                                 <div class="js-anomalyStaticInfo {{ ($signature->enterAnomaly() == "K162" ? '' : 'js-hidden') }}">
-                                                    {{--<div class="ui-widget">
-                                                        <input type="text"
-                                                               class="js-exitAnomaly"
-                                                               data-value="{{ $signature->exitAnomaly() }}"
-                                                               data-size="{{ $signature->exitAnomaly() ? $signature->exitAnomaly()->wormholeSize() : ''  }}"
-                                                               data-class="{{ $signature->exitAnomaly() ? $signature->exitAnomaly()->wormholeClass(true) : '' }}"
-                                                               placeholder="Other side ID ?, ex. N110"
-                                                               name="exitAnomaly_{{ $signature->signatureId }}"
-                                                               value="{{ $signature->exitAnomaly() }}">
-                                                    </div>--}}
                                                     <label for="exitAnomaly_{{ $signature->signatureId }}">Exit WH</label>
-                                                    <select class="js-exitAnomaly" name="exitAnomaly_{{ $signature->signatureId }}" id="exitAnomaly_{{ $signature->signatureId }}">
-                                                        <option value="">--- Select ---</option>
+                                                    <select class="js-exitAnomaly chosen-select" name="exitAnomaly_{{ $signature->signatureId }}" id="exitAnomaly_{{ $signature->signatureId }}">
+                                                        <option value="">Select an option</option>
                                                         @foreach ($wormholes as $wormhole)
                                                             <option value="{{ $wormhole->wormholeName }}" {{ $signature->exitAnomaly() == $wormhole->wormholeName ? 'selected' : '' }}>{{ $wormhole->wormholeName }}</option>
                                                         @endforeach
@@ -125,7 +105,7 @@
                                                                 class="js-anomaly{{ $anomalyInfoKey }}"
                                                                 data-value="{{ $signature->{'anomaly' . $anomalyInfoKey} }}"
                                                                 id="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}">
-                                                            <option value="">Select</option>
+                                                            <option value="">Select an option</option>
                                                             @foreach ($anomalyInfoValues as $anomalyInfoValue)
                                                                 @php $selected = $signature->{'anomaly' . $anomalyInfoKey} === $anomalyInfoValue ? 'selected="selected"' : ''; @endphp
                                                                 <option value="{{ $anomalyInfoValue }}" {{ $selected }}>{{ $anomalyInfoValue }}</option>
@@ -143,7 +123,7 @@
                                                                 class="js-anomaly{{ $anomalyInfoKey }}"
                                                                 data-value="{{ $signature->{'anomaly' . $anomalyInfoKey} }}"
                                                                 id="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}">
-                                                            <option value="">Select</option>
+                                                            <option value="">Select an option</option>
                                                             @foreach ($anomalyInfoValues as $anomalyInfoValue)
                                                                 @php $selected = $signature->{'anomaly' . $anomalyInfoKey} === $anomalyInfoValue ? 'selected="selected"' : ''; @endphp
                                                                 <option value="{{ $anomalyInfoValue }}" {{ $selected }}>{{ $anomalyInfoValue }}</option>
@@ -262,6 +242,11 @@
                 $(this).select();
             });
 
+            $('select').select2({
+                allowClear: true,
+                placeholder: 'Select an option'
+            });
+
             $('.js-exitCode').inputmask({
                 mask: "a{3}-[9{3}]",
                 greedy: false,
@@ -364,8 +349,13 @@
 
             $(document).on("change", ".js-exitAnomaly", function (event) {
                 var alternativeContainer = $(event.target).closest('td').find('.js-anomalyStaticInfoAlternative');
-                if (! event.target.value || event.target.value == "K162") {
-                    $(event.target).val("");
+                if (event.target.value == "K162") {
+                    $(event.target).val(null).trigger('change');
+                    alternativeContainer.removeClass('js-hidden');
+                    return;
+                }
+
+                if (! event.target.value) {
                     alternativeContainer.removeClass('js-hidden');
                 } else {
                     alternativeContainer.addClass('js-hidden');
@@ -491,7 +481,7 @@
                 });
             }
 
-            $(document).on('change', '.js-exitCode,.js-anomalyDynamicInfo select,.js-anomalyStaticInfo select', ajaxSaveSignatureInfo); //,.js-exitSystem
+            $(document).on('change', '.js-exitCode,.js-anomalyDynamicInfo select,.js-anomalyStaticInfo select,.js-anomalyStaticInfoAlternative', ajaxSaveSignatureInfo); //,.js-exitSystem
             $(document).on('keypress', '.js-exitCode', function (event) { //,.js-exitSystem
                 if (event.keyCode === 13) {
                     event.preventDefault();

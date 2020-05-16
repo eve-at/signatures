@@ -4,6 +4,8 @@
 $fa-font-path: "/fonts/font-awesome" !default;
 @import "~font-awesome/scss/font-awesome.scss";
 
+@import "~select2/dist/css/select2.css";
+
 *, html {
   /*font-family: "Miriam Libre", "Source Sans Pro", sans-serif;*/
   font-family:Roboto, sans-serif;
