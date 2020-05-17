@@ -138,7 +138,7 @@ class AjaxController extends Controller
                 return response()->json(['status' => 'ok'], 200);
             }
 
-            if (! preg_match('/^([A-Za-z]{3})(-\d{0,3}|$)$/', $request->value, $output)) {
+            if (! preg_match('/^([A-Za-z]{3})(-\d{0,3}|$)$/', strtoupper($request->value), $output)) {
                 $signature->exitCode = null;
                 $signature->save();
                 return response()->json(['error' => 'Bad values'], 400);

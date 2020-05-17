@@ -57,7 +57,7 @@ class Signature extends Model
             $staticData[] = 'Size: ' . $this->anomalySize;
         }
 
-        $summary = [];
+        $summary = [""];
         if ($enterAnomaly = $this->enterAnomaly()) {
             $summary[0] = $enterAnomaly->wormholeName;
             if ($enterAnomaly->wormholeName === 'K162') {
@@ -66,20 +66,20 @@ class Signature extends Model
                     $summary[0] .= $exitAnomaly->wormholeName;
 
                     $staticData = [];
-                    $staticData[] = 'to ' . $exitAnomaly->wormholeClass(true);
-                    $staticData[] = 'Size: ' . $exitAnomaly->wormholeSize();
+                    $staticData[] = $exitAnomaly->wormholeClass(true);
+                    $staticData[] = $exitAnomaly->wormholeSize();
                 } else {
                     $summary[0] .= '?';
                 }
             } else {
                 $staticData = [];
-                $staticData[] = 'to ' . $enterAnomaly->wormholeClass(true);
-                $staticData[] = 'Size: ' . $enterAnomaly->wormholeSize();
+                $staticData[] = $enterAnomaly->wormholeClass(true);
+                $staticData[] = $enterAnomaly->wormholeSize();
             }
         }
 
         if (count($staticData)) {
-            $summary[] = implode(', ', $staticData);
+            $summary[0] .= " (" . implode(', ', $staticData) . ")";
         }
 
         if ($this->anomalyMass) {
@@ -90,6 +90,6 @@ class Signature extends Model
             $summary[] = 'Time: ' . $this->anomalyTime;
         }
 
-        return implode(', ', $summary);
+        return implode('<br>', $summary);
     }
 }

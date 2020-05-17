@@ -41,8 +41,8 @@
                                 <th rowspan="2">Options</th>
                             </tr>
                             <tr>
-                                <th>ID</th>
                                 <th>System</th>
+                                <th>ID</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -132,29 +132,11 @@
                                                     @endforeach
                                                 </div>
                                             <td>
-                                        @elseif ($signature->anomalyId)
+                                        @else
                                             <td colspan="2">
-                                                {{ $signature->enterAnomaly() }}
-                                                @if ("K162" == $signature->enterAnomaly())
-                                                    leads to {{ $signature->exitAnomaly() ?? '' }}
-                                                @endif
-                                                <span class="js-anomalySummary">{{ $signature->summary() }}</span>
+                                                <span class="anomalySummary">{!! $signature->summary() !!}</span>
                                             </td>
                                         @endif
-                                        <td>
-                                            @if ($arrEveData['characterId'] == $signature->characterId)
-                                                <div class="ui-widget">
-                                                    <input type="text"
-                                                           class="js-exitCode"
-                                                           placeholder="Other side WH ID, ex. ZFD-231"
-                                                           data-value="{{ $signature->exitCode }}"
-                                                           name="exitCode_{{ $signature->signatureId }}"
-                                                           value="{{ $signature->exitCode }}">
-                                                </div>
-                                            @elseif ($signature->exitCode)
-                                                {{ $signature->exitCode }}
-                                            @endif
-                                        </td>
                                         <td>
                                             @if ($arrEveData['characterId'] == $signature->characterId)
                                                 <div class="ui-widget">
@@ -167,6 +149,20 @@
                                                 </div>
                                             @elseif ($signature->exitSystem)
                                                 {{ $signature->exitSystem() }}
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($arrEveData['characterId'] == $signature->characterId)
+                                                <div class="ui-widget">
+                                                    <input type="text"
+                                                           class="js-exitCode"
+                                                           placeholder="Other side WH ID, ex. ZFD-231"
+                                                           data-value="{{ $signature->exitCode }}"
+                                                           name="exitCode_{{ $signature->signatureId }}"
+                                                           value="{{ $signature->exitCode }}">
+                                                </div>
+                                            @elseif ($signature->exitCode)
+                                                {{ $signature->exitCode }}
                                             @endif
                                         </td>
                                     @else
@@ -265,14 +261,14 @@
 
                 var staticData = [];
                 if (anomalyClass) {
-                    staticData.push('to ' + anomalyClass);
+                    staticData.push(anomalyClass);
                 }
                 if (anomalySize) {
-                    staticData.push('Size: ' + anomalySize);
+                    staticData.push(anomalySize);
                 }
 
                 console.log(enterAnomaly, exitAnomaly, anomalyClass, anomalySize, staticData);
-                var summary = [];
+                var summary = [""];
                 if (enterAnomaly) {
                     summary[0] = enterAnomaly;
                     if (enterAnomaly === 'K162') {
@@ -281,20 +277,20 @@
                             summary[0] += exitAnomaly;
 
                             staticData = [];
-                            staticData.push('to ' + wormholes[exitAnomaly].wormholeClassShort);
-                            staticData.push('Size: ' + wormholes[exitAnomaly].wormholeSize);
+                            staticData.push(wormholes[exitAnomaly].wormholeClassShort);
+                            staticData.push(wormholes[exitAnomaly].wormholeSize);
                         } else {
                             summary[0] += '?';
                         }
                     } else {
                         staticData = [];
-                        staticData.push('to ' + wormholes[enterAnomaly].wormholeClassShort);
-                        staticData.push('Size: ' + wormholes[enterAnomaly].wormholeSize);
+                        staticData.push(wormholes[enterAnomaly].wormholeClassShort);
+                        staticData.push(wormholes[enterAnomaly].wormholeSize);
                     }
                 }
 
                 if (staticData.length) {
-                    summary.push(staticData.join(', '));
+                    summary[0] += " (" + staticData.join(', ') + ")";
                 }
 
                 if (anomalyMass) {
@@ -305,7 +301,7 @@
                     summary.push('Time: ' + anomalyTime);
                 }
 
-                tr.find('.js-anomalySummary').html(summary.join(', '));
+                tr.find('.js-anomalySummary').html(summary.join('<br>'));
             }
 
             $('tr[data-anomalygroup="Wormhole"]').each(function () {
