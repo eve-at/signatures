@@ -32,17 +32,17 @@
                     <table>
                         <thead>
                             <tr>
-                                <th rowspan="2">ID</th>
-                                <th rowspan="2">Group</th>
-                                <th rowspan="2" colspan="2">Wormhole</th>
-                                <th colspan="2">Other side WH</th>
-                                <th rowspan="2">Estimated Life</th>
-                                <th rowspan="2">Updated</th>
-                                <th rowspan="2">Options</th>
+                                <th>ID</th>
+                                <th>Group</th>
+                                <th colspan="2">Wormhole</th>
+                                <th>Other side System</th>
+                                <th>Other side ID</th>
+                                <th>Estimated Life</th>
+                                <th>Updated</th>
+                                <th>Options</th>
                             </tr>
                             <tr>
-                                <th>System</th>
-                                <th>ID</th>
+
                             </tr>
                         </thead>
                         <tbody>
@@ -131,30 +131,39 @@
                                                         </select>
                                                     @endforeach
                                                 </div>
-                                            <td>
+                                            </td>
                                         @else
                                             <td colspan="2">
                                                 <span class="anomalySummary">{!! $signature->summary() !!}</span>
                                             </td>
                                         @endif
-                                        <td>
+                                        <td width="150">
                                             @if ($arrEveData['characterId'] == $signature->characterId)
-                                                <div class="ui-widget">
+                                                <label for="exitSystem_{{ $signature->signatureId }}">Other side Solar System</label>
+                                                <select name="exitSystem_{{ $signature->signatureId }}" id="exitSystem_{{ $signature->signatureId }}"
+                                                        class="js-exitSystem">
+                                                    @if ($exitSystem = $signature->exitSystem())
+                                                        <option value="{{ $exitSystem->solarSystemID }}" selected="selected">{!! $exitSystem->toInfoString() !!}</option>
+                                                    @endif
+                                                    
+                                                </select>
+                                                {{--<div class="ui-widget">
                                                     <input type="text"
                                                            class="js-exitSystem"
                                                            placeholder="Other side Solar System"
                                                            data-value="{{ $signature->exitSystem() }}"
                                                            name="exitSystem_{{ $signature->signatureId }}"
                                                            value="{{ $signature->exitSystem() }}">
-                                                </div>
+                                                </div>--}}
                                             @elseif ($signature->exitSystem)
                                                 {{ $signature->exitSystem() }}
                                             @endif
                                         </td>
-                                        <td>
+                                        <td width="50">
                                             @if ($arrEveData['characterId'] == $signature->characterId)
                                                 <div class="ui-widget">
                                                     <input type="text"
+                                                           style="width:50px;"
                                                            class="js-exitCode"
                                                            placeholder="Other side WH ID, ex. ZFD-231"
                                                            data-value="{{ $signature->exitCode }}"
@@ -240,7 +249,8 @@
 
             $('select').select2({
                 allowClear: true,
-                placeholder: 'Select an option'
+                placeholder: 'Select an option',
+                width: 'resolve',
             });
 
             $('.js-exitCode').inputmask({
@@ -363,7 +373,34 @@
             });
 
             var exitSystem_cache = {};
-            $(".js-exitSystem").autocomplete({
+            $(".js-exitSystem").select2({
+                ajax: {
+                    url: "{{ route('ajax.systems') }}",
+                    dataType: "json",
+                    minimumInputLength: 3,
+                    processResults: function (data) {
+                        return {
+                            results: data.items
+                        };
+                    }
+                },
+                width: 'resolve',
+                allowClear: true,
+                placeholder: 'Other side Solar System',
+                language: {
+                    searching: function() {
+                        return "Enter 3+ characters";
+                    }
+                },
+                searching: function() {
+                    return "Please enter 3 or more characters";
+                },
+            });
+
+            $(document).on("change", ".js-exitSystem", function (event) {
+                ajaxSaveSignatureInfo(event);
+            });
+            /*$(".js-exitSystem").autocomplete({
                 minLength: 3,
                 source: function( request, response ) {
                     var term = request.term;
@@ -386,18 +423,21 @@
                         response( data );
                     });
                 },
-                /*change: function (event, ui) {
-                    ajaxSaveSignatureInfo(event);
-                },*/
+                change: function (event, ui) {
+                    event.preventDefault();
+                },
                 select: function( event, ui ) {
+                    console.log(2);
                     if (! ui.item.id) {
-                        event.preventDefault();
+                        event.target.value = "";
+                        console.log(event.target);
+                        //event.preventDefault();
                         return;
                     }
                     event.target.value = ui.item.value;
                     ajaxSaveSignatureInfo(event);
                 }
-            });
+            });*/
 
             $(document).on('click', '.js-remove', function (event) {
                 event.preventDefault();
@@ -479,8 +519,8 @@
                 });
             }
 
-            $(document).on('change', '.js-exitCode,.js-anomalyDynamicInfo select,.js-anomalyStaticInfo select,.js-anomalyStaticInfoAlternative', ajaxSaveSignatureInfo); //,.js-exitSystem
-            $(document).on('keypress', '.js-exitCode', function (event) { //,.js-exitSystem
+            $(document).on('change', '.js-exitCode,.js-anomalyDynamicInfo select,.js-anomalyStaticInfo select,.js-anomalyStaticInfoAlternative', ajaxSaveSignatureInfo);
+            $(document).on('keypress', '.js-exitCode', function (event) {
                 if (event.keyCode === 13) {
                     event.preventDefault();
                     this.blur(); // will trigger "change"

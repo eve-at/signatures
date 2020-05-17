@@ -67,7 +67,7 @@ div.dropdown {
 }
 
 .container {
-  max-width:900px;
+  max-width:1200px;
   display:block;
   margin:0 auto;
 }
@@ -235,4 +235,8 @@ footer a:hover {
 a[target="_blank"]:after {
   font-family: 'FontAwesome';
   content: " \f08e";
+}
+
+.select2-container {
+  min-width: 200px !important;
 }

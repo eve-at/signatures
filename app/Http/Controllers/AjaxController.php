@@ -30,13 +30,17 @@ class AjaxController extends Controller
     {
         $systems = System::where('solarSystemName', 'LIKE', '%' . $request->term . '%')->orderBy('solarSystemName', 'ASC')->get();
 
-        return collect($systems)->map(function ($system) {
+        $items = collect($systems)->map(function ($system) {
             return [
                 'id' => $system->solarSystemID,
-                'label' => $system->solarSystemName . ' (' . $system->regionName() . ')',
-                'value' => $system->solarSystemName,
+                'text' => $system->toInfoString(),
             ];
         })->toArray();
+
+        return [
+            "total_count" => count($items),
+            "items" => $items,
+        ];
     }
 
     public function signature(Request $request)
@@ -55,7 +59,7 @@ class AjaxController extends Controller
             return 'anomaly' . $key;
         })->merge(['enterAnomaly', 'exitAnomaly', 'exitCode', 'exitSystem'])->toArray();
         if (! in_array($field, $fieldsWhiteList)) {
-            return response()->json(['error' => 'Bad values'], 400);
+            return response()->json(['error' => 'Bad values1'], 400);
         }
 
         // 1. Find character's signature
@@ -66,7 +70,7 @@ class AjaxController extends Controller
             ["signatureId", "=", $signatureId],
         ])->first();
         if (! $signature) {
-            return response()->json(['error' => 'Bad values'], 400);
+            return response()->json(['error' => 'Bad values2'], 400);
         }
 
         // 2.1 Set Wormhole
@@ -95,7 +99,7 @@ class AjaxController extends Controller
                 }
 
                 $signature->save();
-                return response()->json(['error' => 'Bad values'], 400);
+                return response()->json(['error' => 'Bad values3'], 400);
             }
 
             $signature->{$field} = $wormhole->wormholeId;
@@ -141,7 +145,7 @@ class AjaxController extends Controller
             if (! preg_match('/^([A-Za-z]{3})(-\d{0,3}|$)$/', strtoupper($request->value), $output)) {
                 $signature->exitCode = null;
                 $signature->save();
-                return response()->json(['error' => 'Bad values'], 400);
+                return response()->json(['error' => 'Bad values4'], 400);
             }
 
             $signature->exitCode = $output[1] . (strlen($output[2] ?? '') == 4 ? $output[2] : '');
@@ -157,11 +161,11 @@ class AjaxController extends Controller
                 return response()->json(['status' => 'ok'], 200);
             }
 
-            $system = System::where("solarSystemName", "=", $request->value)->first();
+            $system = System::find($request->value)->first();
             if (! $system) {
                 $signature->exitSystem = null;
                 $signature->save();
-                return response()->json(['error' => 'Bad values'], 400);
+                return response()->json(['error' => 'Bad values5'], 400);
             }
 
             $signature->exitSystem = $system->solarSystemID;
@@ -196,11 +200,11 @@ class AjaxController extends Controller
 
             $signature->{$field} = null;
             $signature->save();
-            return response()->json(['error' => 'Bad values'], 400);
+            return response()->json(['error' => 'Bad values6'], 400);
 
         }
 
-        return response()->json(['error' => 'Bad values'], 400);
+        return response()->json(['error' => 'Bad values7'], 400);
     }
 
     public function signatureDelete(Request $request)
@@ -217,7 +221,7 @@ class AjaxController extends Controller
             ["signatureId", "=", $request->value],
         ])->first();
         if (! $signature) {
-            return response()->json(['error' => 'Bad values'], 400);
+            return response()->json(['error' => 'Bad values8'], 400);
         }
 
         $signature->forceDelete();
@@ -238,12 +242,12 @@ class AjaxController extends Controller
             ["signatureId", "=", $request->id],
         ])->first();
         if (! $signature) {
-            return response()->json(['error' => 'Bad values'], 400);
+            return response()->json(['error' => 'Bad values9'], 400);
         }
 
         // can't rate your own signature
         if ($signature->characterId == $arrEveData['characterId']) {
-            return response()->json(['error' => 'Bad values'], 400);
+            return response()->json(['error' => 'Bad values10'], 400);
         }
 
         $rating = Rating::firstOrNew([
