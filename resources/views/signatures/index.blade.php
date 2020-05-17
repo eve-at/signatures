@@ -273,7 +273,7 @@
 
                 console.log(enterAnomaly, exitAnomaly, anomalyClass, anomalySize, staticData);
                 var summary = [];
-                if (enterAnomaly.length) {
+                if (enterAnomaly) {
                     summary[0] = enterAnomaly;
                     if (enterAnomaly === 'K162') {
                         summary[0] += "->";
@@ -297,11 +297,11 @@
                     summary.push(staticData.join(', '));
                 }
 
-                if (anomalyMass.length) {
+                if (anomalyMass) {
                     summary.push('Mass: ' + anomalyMass);
                 }
 
-                if (anomalyTime.length) {
+                if (anomalyTime) {
                     summary.push('Time: ' + anomalyTime);
                 }
 
@@ -357,6 +357,8 @@
 
                 if (! event.target.value) {
                     alternativeContainer.removeClass('js-hidden');
+                    $(event.target).closest('tr').find('.js-anomalySize').val(null).trigger('change');
+                    $(event.target).closest('tr').find('.js-anomalyClass').val(null).trigger('change');
                 } else {
                     alternativeContainer.addClass('js-hidden');
                 }
