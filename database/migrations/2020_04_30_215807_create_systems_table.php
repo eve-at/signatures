@@ -40,6 +40,7 @@ class CreateSystemsTable extends Migration
             $table->double('radius')->nullable();
             $table->integer('sunTypeID')->nullable();
             $table->string('securityClass', 2)->nullable();
+            $table->enum('class', ['HS', 'LS', 'NS', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C13', 'Thera'])->nullable();
 
             $table->foreign('regionID')->references('regionID')->on('regions');
             $table->foreign('constellationID')->references('constellationID')->on('constellations');

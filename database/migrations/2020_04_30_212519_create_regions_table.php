@@ -27,6 +27,7 @@ class CreateRegionsTable extends Migration
             $table->double('zMax');
             $table->integer('factionID')->nullable();
             $table->double('radius')->nullable();
+            $table->enum('class', ['HS', 'LS', 'NS', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C13', 'Thera'])->nullable();
         });
     }
 

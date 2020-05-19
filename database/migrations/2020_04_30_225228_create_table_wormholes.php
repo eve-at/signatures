@@ -16,8 +16,8 @@ class CreateTableWormholes extends Migration
         Schema::create('wormholes', function (Blueprint $table) {
             $table->bigIncrements('wormholeId')->unsigned();
             $table->string('wormholeName', 4);
-            $table->string('systemType', 20);
-            $table->string('systemTypeClass', 10);
+            $table->enum('class', ['HS', 'LS', 'NS', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C13', 'Thera'])->nullable();
+            $table->string('ClassName', 10);
             $table->integer('maxStableTime')->comment('hours');
             $table->integer('maxStableMass')->comment('millions kg');
             $table->integer('maxMassRegeneration')->comment('millions kg');
