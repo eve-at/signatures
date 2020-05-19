@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class System extends Model
 {
-    protected $primaryKey = 'solarSystemId';
+    protected $primaryKey = 'solarSystemID';
     public $timestamps = false;
 
     public function systemName()
@@ -31,20 +31,18 @@ class System extends Model
 
     public function isWH()
     {
-        // Exception : J1226-0 (C4)
-        return preg_match('/^J\d{4}/', $this->solarSystemName) || $this->solarSystemName === ' Thera';
+        return in_array($this->class, ['C1','C2','C3','C4','C5','C6','C13','Thera']);
     }
 
     public function whClass()
     {
-        // TODO: add WH Class to system table
-        return "C?";
+        return $this->class . ($this->className ? ' ' . $this->className : '');
     }
 
     public function toInfoString()
     {
         if ($this->isWH()) {
-            return $this->solarSystemName . ", " . $this->whClass();
+            return $this->solarSystemName . ", " . $this->class;
         }
         return $this->solarSystemName . " " . $this->security() . " (" . $this->regionName() . ")";
     }

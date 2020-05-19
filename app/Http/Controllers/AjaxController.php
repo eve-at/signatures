@@ -161,7 +161,7 @@ class AjaxController extends Controller
                 return response()->json(['status' => 'ok'], 200);
             }
 
-            $system = System::find($request->value)->first();
+            $system = System::find($request->value);
             if (! $system) {
                 $signature->exitSystem = null;
                 $signature->save();
