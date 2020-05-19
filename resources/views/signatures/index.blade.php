@@ -48,6 +48,7 @@
                         <tbody>
                             <?php foreach ($signatures as $signature): ?>
                                 @php
+                                    $exitSystem = $signature->exitSystem();
                                     $ratings = [[],[]];
                                     foreach ($signature['ratings'] as $rating):
                                         // skip disliked signatures
@@ -100,17 +101,19 @@
                                                 <div class="js-anomalyStaticInfoAlternative {{ $showStatic ? '' : 'js-hidden' }}">
                                                     OR<br>
                                                     @foreach ($anomalyStatic as $anomalyInfoKey => $anomalyInfoValues)
-                                                        <label for="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}">{{ $anomalyInfoKey }}</label>
-                                                        <select name="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}"
-                                                                class="js-anomaly{{ $anomalyInfoKey }}"
-                                                                data-value="{{ $signature->{'anomaly' . $anomalyInfoKey} }}"
-                                                                id="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}">
-                                                            <option value="">Select an option</option>
-                                                            @foreach ($anomalyInfoValues as $anomalyInfoValue)
-                                                                @php $selected = $signature->{'anomaly' . $anomalyInfoKey} === $anomalyInfoValue ? 'selected="selected"' : ''; @endphp
-                                                                <option value="{{ $anomalyInfoValue }}" {{ $selected }}>{{ $anomalyInfoValue }}</option>
-                                                            @endforeach
-                                                        </select>
+                                                        <div class="js-static-{{ $anomalyInfoKey }} {{ $anomalyInfoKey == "Class" && $exitSystem ? 'js-hidden' : '' }}">
+                                                            <label for="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}">{{ $anomalyInfoKey }}</label>
+                                                            <select name="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}"
+                                                                    class="js-anomaly{{ $anomalyInfoKey }}"
+                                                                    data-value="{{ $signature->{'anomaly' . $anomalyInfoKey} }}"
+                                                                    id="anomaly{{ $anomalyInfoKey }}_{{ $signature->signatureId }}">
+                                                                <option value="">Select an option</option>
+                                                                @foreach ($anomalyInfoValues as $anomalyInfoValue)
+                                                                    @php $selected = $signature->{'anomaly' . $anomalyInfoKey} === $anomalyInfoValue ? 'selected="selected"' : ''; @endphp
+                                                                    <option value="{{ $anomalyInfoValue }}" {{ $selected }}>{{ $anomalyInfoValue }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
                                                     @endforeach
                                                 </div>
                                                 <span class="js-anomalySummary">{{ $signature->summary() }}</span>
@@ -142,7 +145,7 @@
                                                 <label for="exitSystem_{{ $signature->signatureId }}">Other side Solar System</label>
                                                 <select name="exitSystem_{{ $signature->signatureId }}" id="exitSystem_{{ $signature->signatureId }}"
                                                         class="js-exitSystem">
-                                                    @if ($exitSystem = $signature->exitSystem())
+                                                    @if ($exitSystem)
                                                         <option value="{{ $exitSystem->solarSystemID }}" selected="selected">{!! $exitSystem->toInfoString() !!}</option>
                                                     @endif
                                                     
@@ -338,7 +341,6 @@
                 $('.js-dialog[data-like="' + $(event.target).data('like') + '"]').dialog();
             });
 
-            var anomalyId_cache = {};
             $(document).on("change", ".js-enterAnomaly", function (event) {
                 ajaxSaveSignatureInfo(event);
 
@@ -372,7 +374,6 @@
                 ajaxSaveSignatureInfo(event);
             });
 
-            var exitSystem_cache = {};
             $(".js-exitSystem").select2({
                 ajax: {
                     url: "{{ route('ajax.systems') }}",
@@ -398,6 +399,11 @@
             });
 
             $(document).on("change", ".js-exitSystem", function (event) {
+                if ($(event.target).val()) {
+                    $(event.target).closest('tr').find('.js-static-Class').addClass('js-hidden');
+                } else {
+                    $(event.target).closest('tr').find('.js-static-Class').removeClass('js-hidden');
+                }
                 ajaxSaveSignatureInfo(event);
             });
             /*$(".js-exitSystem").autocomplete({
