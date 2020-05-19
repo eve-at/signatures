@@ -31,7 +31,8 @@ class System extends Model
 
     public function isWH()
     {
-        return preg_match('/J\d{6}/', $this->solarSystemName);
+        // Exception : J1226-0 (C4)
+        return preg_match('/^J\d{4}/', $this->solarSystemName) || $this->solarSystemName === ' Thera';
     }
 
     public function whClass()
