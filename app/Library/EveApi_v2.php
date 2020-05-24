@@ -3,6 +3,7 @@
 namespace App\Library;
 
 use App\Character;
+use App\Exceptions\ServerOfflineException;
 use GuzzleHttp;
 use Carbon\Carbon;
 use Mockery\Exception;
@@ -148,6 +149,30 @@ class EveApi_v2
     }
 
     /**
+     * EVE Server status
+     * This route is cached for up to 30 seconds
+     * @see : https://esi.evetech.net/latest/status/?datasource=tranquility
+     *
+     * @return bool
+     */
+    public static function serverIsOnline()
+    {
+        $url = static::$esiUrl . "status/?datasource=tranquility";
+
+        $client = new GuzzleHttp\Client();
+        $response = $client->request('GET', $url, [
+            'http_errors' => false
+        ]);
+
+        if ($response->getStatusCode() != 200) {
+            return false;
+        }
+
+        $content = json_decode($response->getBody()->getContents());
+        return !! ($content->players ?? 0);
+    }
+
+    /**
      * Information about the characters current location.
      * Returns the current solar system id, and also the current station or structure ID if applicable
      * @see : https://esi.evetech.net/ui/#/Location/get_characters_character_id_location
@@ -166,8 +191,11 @@ class EveApi_v2
             'http_errors' => false
         ]);
 
-        if($response->getStatusCode() != 200) {
-            throw new Exception("Cannot obtain EVE Character location");
+        if ($response->getStatusCode() != 200) {
+            if (! static::serverIsOnline()) {
+                throw new ServerOfflineException();
+            }
+            throw new CharacterLocationException("Cannot obtain EVE Character location");
         }
 
         /* Example : $response->getBody()->getContents()

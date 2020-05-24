@@ -12,6 +12,8 @@
 */
 Route::get('/', 'IndexController@index')->name('index');
 
+Route::get('/offline', 'ErrorController@offline')->name('error/offline');
+
 Route::get('/legal', 'PagesController@legal')->name('legal');
 
 Route::get('/sso', 'SsoController@index')->name('sso');

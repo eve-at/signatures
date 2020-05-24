@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Character;
+use App\Exceptions\CharacterLocationException;
+use App\Exceptions\ServerOfflineException;
 use App\Library\EveApi_v2;
 use App\Signature;
 use App\Wormhole;
@@ -24,7 +26,14 @@ class SignaturesController extends Controller
         }
 
         $character = Character::findOrFail($arrEveData['characterId']);
-        $system = $character->getSystem();
+        try {
+            $system = $character->getSystem();
+        } catch (ServerOfflineException $e) {
+            return redirect()->route('error/offline');
+        } catch (CharacterLocationException $e) {
+            return redirect()->route('index');
+        }
+
         $signatures = Signature::with('ratings')->where(['enterSystem' => $system->solarSystemID])->orderBy('enterCode')->get();
         $anomalyStatic = $this->anomalyStatic;
         $anomalyDynamic = $this->anomalyDynamic;

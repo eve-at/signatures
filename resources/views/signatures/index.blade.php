@@ -314,7 +314,7 @@
                     alternativeContainer.addClass('js-hidden');
                 }
 
-                ajaxSaveSignatureInfo(event);
+                //ajaxSaveSignatureInfo(event);
             });
 
             $(".js-exitSystem").select2({
