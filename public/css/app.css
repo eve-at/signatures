@@ -5303,3 +5303,7 @@ a[target=_blank]:after {
   min-width: 200px !important;
 }
 
+.summaryError {
+  color: #f00;
+}
+

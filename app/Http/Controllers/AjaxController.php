@@ -45,12 +45,20 @@ class AjaxController extends Controller
 
     public function signature(Request $request)
     {
+        $dataResponce = [
+            'message' => '',
+            'warning' => '',
+            'summary' => '',
+        ];
+
         if (! isset($request->field)) {
-            return response()->json(['error' => 'Missing fields'], 400);
+            $dataResponce['message'] = 'Missing fields';
+            return response()->json(['status' => 'error', 'data' => $dataResponce], 400);
         }
         $arr = explode('_', $request->field);
         if (count($arr) != 2) {
-            return response()->json(['error' => 'Missing fields'], 400);
+            $dataResponce['message'] = 'Missing fields';
+            return response()->json(['status' => 'error', 'data' => $dataResponce], 400);
         }
         list($field, $signatureId) = $arr;
 
@@ -59,7 +67,8 @@ class AjaxController extends Controller
             return 'anomaly' . $key;
         })->merge(['enterAnomaly', 'exitAnomaly', 'exitCode', 'exitSystem'])->toArray();
         if (! in_array($field, $fieldsWhiteList)) {
-            return response()->json(['error' => 'Bad values1'], 400);
+            $dataResponce['message'] = 'Bad values';
+            return response()->json(['status' => 'error', 'data' => $dataResponce], 400);
         }
 
         // 1. Find character's signature
@@ -70,7 +79,8 @@ class AjaxController extends Controller
             ["signatureId", "=", $signatureId],
         ])->first();
         if (! $signature) {
-            return response()->json(['error' => 'Bad values2'], 400);
+            $dataResponce['message'] = 'Bad values';
+            return response()->json(['status' => 'error', 'data' => $dataResponce], 400);
         }
 
         // 2.1 Set Wormhole
@@ -86,7 +96,7 @@ class AjaxController extends Controller
                 }
 
                 $signature->save();
-                return response()->json(['status' => 'ok'], 200);
+                return response()->json(['status' => 'ok', 'summary' => $signature->summary()], 200);
             }
 
             $wormhole = Wormhole::where("wormholeName", "=", strtoupper($request->value))->first();
@@ -99,7 +109,7 @@ class AjaxController extends Controller
                 }
 
                 $signature->save();
-                return response()->json(['error' => 'Bad values3'], 400);
+                return response()->json(['error' => 'Bad values', 'summary' => $signature->summary()], 400);
             }
 
             $signature->{$field} = $wormhole->wormholeId;
@@ -111,8 +121,8 @@ class AjaxController extends Controller
                     $signature->{$anotherSideTitle} = null;
                 }
             } else {
-                $signature->anomalySize = $wormhole->wormholeSize();
-                $signature->anomalyClass = $wormhole->wormholeClass();
+                $signature->anomalySize = null;
+                $signature->anomalyClass = null;
                 $signature->{$anotherSideTitle} = $k162->wormholeId;
             }
 
@@ -131,7 +141,7 @@ class AjaxController extends Controller
                 'AnotherSideWormhole' => $anotherSideWormhole ? $anotherSideWormhole->wormholeName : '',
             ];
 
-            return response()->json(['status' => 'ok', 'data' => $data], 200);
+            return response()->json(['status' => 'ok', 'data' => $data, 'summary' => $signature->summary()], 200);
         }
 
         // 2.2 Set exit code
@@ -139,18 +149,18 @@ class AjaxController extends Controller
             if (! $request->value) {
                 $signature->exitCode = null;
                 $signature->save();
-                return response()->json(['status' => 'ok'], 200);
+                return response()->json(['status' => 'ok', 'summary' => $signature->summary()], 200);
             }
 
             if (! preg_match('/^([A-Za-z]{3})(-\d{0,3}|$)$/', strtoupper($request->value), $output)) {
                 $signature->exitCode = null;
                 $signature->save();
-                return response()->json(['error' => 'Bad values4'], 400);
+                return response()->json(['error' => 'Bad values', 'summary' => $signature->summary()], 400);
             }
 
             $signature->exitCode = $output[1] . (strlen($output[2] ?? '') == 4 ? $output[2] : '');
             $signature->save();
-            return response()->json(['status' => 'ok'], 200);
+            return response()->json(['status' => 'ok', 'summary' => $signature->summary()], 200);
         }
 
         // 2.3 Find System
@@ -158,19 +168,19 @@ class AjaxController extends Controller
             if (! $request->value) {
                 $signature->exitSystem = null;
                 $signature->save();
-                return response()->json(['status' => 'ok'], 200);
+                return response()->json(['status' => 'ok', 'summary' => $signature->summary()], 200);
             }
 
             $system = System::find($request->value);
             if (! $system) {
                 $signature->exitSystem = null;
                 $signature->save();
-                return response()->json(['error' => 'Bad values5'], 400);
+                return response()->json(['error' => 'Bad values', 'summary' => $signature->summary()], 400);
             }
 
             $signature->exitSystem = $system->solarSystemID;
             $signature->save();
-            return response()->json(['status' => 'ok'], 200);
+            return response()->json(['status' => 'ok', 'summary' => $signature->summary()], 200);
         }
 
         // 2.4 Anomaly Info
@@ -183,7 +193,7 @@ class AjaxController extends Controller
             if (! $request->value) {
                 $signature->{$field} = null;
                 $signature->save();
-                return response()->json(['status' => 'ok', 'data' => $data], 200);
+                return response()->json(['status' => 'ok', 'data' => $data, 'summary' => $signature->summary()], 200);
             }
 
             if (in_array($request->value, $anomalyInfo[$key])) {
@@ -195,16 +205,16 @@ class AjaxController extends Controller
                     'Size'  => '',
                     'Class' => '',
                 ];
-                return response()->json(['status' => 'ok', 'data' => $data], 200);
+                return response()->json(['status' => 'ok', 'data' => $data, 'summary' => $signature->summary()], 200);
             }
 
             $signature->{$field} = null;
             $signature->save();
-            return response()->json(['error' => 'Bad values6'], 400);
+            return response()->json(['status' => 'error', 'message' => 'Bad values', 'summary' => $signature->summary()], 400);
 
         }
 
-        return response()->json(['error' => 'Bad values7'], 400);
+        return response()->json(['error' => 'Bad values', 'summary' => $signature->summary()], 400);
     }
 
     public function signatureDelete(Request $request)

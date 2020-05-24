@@ -32,6 +32,11 @@ class Signature extends Model
         return Character::find($this->characterId);
     }
 
+    public function enterSystem()
+    {
+        return $this->enterSystem ? System::find($this->enterSystem) : null;
+    }
+
     public function exitSystem()
     {
         return $this->exitSystem ? System::find($this->exitSystem) : null;
@@ -57,8 +62,13 @@ class Signature extends Model
             $staticData[] = 'Size: ' . $this->anomalySize;
         }
 
+        $enterAnomaly = $this->enterAnomaly();
+        $exitAnomaly = $this->exitAnomaly();
+        $enterSystem = $this->enterSystem();
+        $exitSystem = $this->exitSystem();
+
         $summary = [""];
-        if ($enterAnomaly = $this->enterAnomaly()) {
+        if ($enterAnomaly) {
             $summary[0] = $enterAnomaly->wormholeName;
             if ($enterAnomaly->wormholeName === 'K162') {
                 $summary[0] .= "->";
@@ -88,6 +98,12 @@ class Signature extends Model
 
         if ($this->anomalyTime) {
             $summary[] = 'Time: ' . $this->anomalyTime;
+        }
+
+        if ($enterAnomaly && $exitSystem && $enterAnomaly->wormholeName != "K162" && $enterAnomaly->class != $exitSystem->class) {
+            $summary[] = "<span class='summaryError'>" . $enterAnomaly->toInfoString() . " cannot leads to " . $exitSystem->toInfoString() . "</span>";
+        } else if ($exitAnomaly && $enterSystem && $exitAnomaly->class != $enterSystem->class) {
+            $summary[] = "<span class='summaryError'>" . $exitAnomaly->toInfoString() . " cannot leads to " . $enterSystem->toInfoString() . "</span>";
         }
 
         return implode('<br>', $summary);

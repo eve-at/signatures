@@ -13,7 +13,7 @@
             <div class="col-md-12">
                 <div class="row">
                     Name : {{ $character->characterName }} <img src="https://images.evetech.net/characters/{{ $character->characterId }}/portrait?size=64" alt="{{ $character->characterName }} portrait" width="64" height="64">
-                    Location: system {{ $system->systemName() }}, region {{ $system->regionName() }}, constellation {{ $system->constellationName() }}
+                    Location: {{ $system->toInfoString() }}
                 </div>
             </div>
             <div class="col-md-12">
@@ -116,7 +116,7 @@
                                                         </div>
                                                     @endforeach
                                                 </div>
-                                                <span class="js-anomalySummary">{{ $signature->summary() }}</span>
+                                                <span class="js-anomalySummary">{!! $signature->summary() !!}</span>
                                             </td>
                                             <td>
                                                 <div class="js-anomalyDynamicInfo">
@@ -159,7 +159,7 @@
                                                            value="{{ $signature->exitSystem() }}">
                                                 </div>--}}
                                             @elseif ($signature->exitSystem)
-                                                {{ $signature->exitSystem() }}
+                                                {{ $signature->exitSystem()->toInfoString() }}
                                             @endif
                                         </td>
                                         <td width="50">
@@ -262,63 +262,6 @@
                 onBeforePaste: function (pastedValue, opts) {
                     return pastedValue.toUpperCase();
                 },
-            });
-
-            function updateSummary(tr) {
-                var enterAnomaly = tr.find('.js-enterAnomaly').val();
-                var exitAnomaly = tr.find('.js-exitAnomaly').val();
-                var anomalyMass = tr.find('.js-anomalyMass').val();
-                var anomalyTime = tr.find('.js-anomalyTime').val();
-                var anomalySize = tr.find('.js-anomalySize').val();
-                var anomalyClass = tr.find('.js-anomalyClass').val();
-
-                var staticData = [];
-                if (anomalyClass) {
-                    staticData.push(anomalyClass);
-                }
-                if (anomalySize) {
-                    staticData.push(anomalySize);
-                }
-
-                console.log(enterAnomaly, exitAnomaly, anomalyClass, anomalySize, staticData);
-                var summary = [""];
-                if (enterAnomaly) {
-                    summary[0] = enterAnomaly;
-                    if (enterAnomaly === 'K162') {
-                        summary[0] += "->";
-                        if (exitAnomaly) {
-                            summary[0] += exitAnomaly;
-
-                            staticData = [];
-                            staticData.push(wormholes[exitAnomaly].wormholeClassShort);
-                            staticData.push(wormholes[exitAnomaly].wormholeSize);
-                        } else {
-                            summary[0] += '?';
-                        }
-                    } else {
-                        staticData = [];
-                        staticData.push(wormholes[enterAnomaly].wormholeClassShort);
-                        staticData.push(wormholes[enterAnomaly].wormholeSize);
-                    }
-                }
-
-                if (staticData.length) {
-                    summary[0] += " (" + staticData.join(', ') + ")";
-                }
-
-                if (anomalyMass) {
-                    summary.push('Mass: ' + anomalyMass);
-                }
-
-                if (anomalyTime) {
-                    summary.push('Time: ' + anomalyTime);
-                }
-
-                tr.find('.js-anomalySummary').html(summary.join('<br>'));
-            }
-
-            $('tr[data-anomalygroup="Wormhole"]').each(function () {
-                updateSummary($(this));
             });
 
             $(document).on('change', '#anomalyGroup', function (event) {
@@ -506,21 +449,10 @@
                     }
                 }).done(function(data) {
                     if (data.status == 'ok') {
-                        /*tr.find('.js-anomalySize').val(data.data.Size).data('value', data.data.Size);
-                        tr.find('.js-anomalyClass').val(data.data.ClassGrouped).data('value', data.data.ClassGrouped);
-                        if ($(event.target).hasClass('js-enterAnomaly')) {
-                            tr.find('.js-exitAnomaly').data('value', data.data.AnotherSideWormhole)
-                                .val(data.data.AnotherSideWormhole);
-                            $(event.target).data('size', data.data.Size)
-                                .data('class', data.data.Class);
-                        } else {
-                            tr.find('.js-enterAnomaly').data('value', data.data.AnotherSideWormhole)
-                                .val(data.data.AnotherSideWormhole);
-                            $(event.target).data('size', data.data.Size)
-                                .data('class', data.data.Class);
-                        }*/
-
-                        updateSummary(tr);
+                        //
+                    }
+                    if (data.summary) {
+                        tr.find('.js-anomalySummary').html(data.summary);
                     }
                 });
             }

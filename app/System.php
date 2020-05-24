@@ -44,7 +44,7 @@ class System extends Model
         if ($this->isWH()) {
             return $this->solarSystemName . ", " . $this->class;
         }
-        return $this->solarSystemName . " " . $this->security() . " (" . $this->regionName() . ")";
+        return $this->solarSystemName . ", " . $this->security() . " (" . $this->regionName() . ")";
     }
 
     public function __toString()

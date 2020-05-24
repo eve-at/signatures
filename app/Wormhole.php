@@ -33,29 +33,32 @@ class Wormhole extends Model
     public function wormholeClass($short = false)
     {
         if ($short) {
-            return str_replace("W-space", "", ucfirst($this->systemType) . str_replace("Class ", "C", $this->systemTypeClass));
+            return $this->class;
         }
 
         $classes = [
-            'hi-sec_' => 'Hisec',
-            'low-sec_' => 'Lowsec',
-            'null-sec_' => 'Nullsec',
-            'w-space_Class 6' => 'Deadly, C6',
-            'w-space_Class 5' => 'Dangerous, C4-C5',
-            'w-space_Class 4' => 'Dangerous, C4-C5',
-            'w-space_Class 3' => 'Unknown, C1-C3',
-            'w-space_Class 2' => 'Unknown, C1-C3',
-            'w-space_Class 1' => 'Unknown, C1-C3',
-            'w-space_Thera' => 'Thera',
+            'HS' => 'High-sec',
+            'LS' => 'Low-sec',
+            'NS' => 'Null-sec',
+            'C6' => 'Deadly, C6',
+            'C5' => 'Dangerous, C4-C5',
+            'C4' => 'Dangerous, C4-C5',
+            'C3' => 'Unknown, C1-C3',
+            'C2' => 'Unknown, C1-C3',
+            'C1' => 'Unknown, C1-C3',
+            'Thera' => 'Thera',
         ];
-        $key = $this->systemType . '_' . $this->systemTypeClass;
-
-        return $classes[$key] ?? '';
+        return $classes[$this->class] ?? '';
     }
 
     public function __toString()
     {
         return $this->wormholeName;
+    }
+
+    public function toInfoString()
+    {
+        return $this->wormholeName . ", " . $this->class;
     }
 
     public function toArray()
